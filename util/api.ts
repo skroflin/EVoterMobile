@@ -1,12 +1,15 @@
 import axios from 'axios';
 import { clearAuthData, getAuthToken, setAuthToken, setRole, setUsername } from './helper';
+
+import { SpringPage } from './types/api.types';
+
 import type {
-    LoginRequest, 
-    LoginResponse, 
-    RegisterRequest, 
-    ForgotPasswordRequest, 
-    ResetPasswordRequest, 
-    VerificationRequest, 
+    LoginRequest,
+    LoginResponse,
+    RegisterRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    VerificationRequest,
     MessageResponse
 } from './types/auth.types';
 
@@ -26,7 +29,7 @@ import type {
     CandidateResponse
 } from './types/election.types';
 
-const BASE_URL = 'http://10.0.2.2:3000/e-voting-rest-api';
+const BASE_URL = 'http://10.0.2.2:3000/e-voting-rest-api/api/v1/';
 
 async function getHeaders() {
     const token = await getAuthToken();
@@ -66,7 +69,7 @@ export const loginUser = async (loginRequest: LoginRequest): Promise<LoginRespon
     return response;
 }
 
-export const registerUser = (registerRequest: RegisterRequest) => 
+export const registerUser = (registerRequest: RegisterRequest) =>
     apiPostCall<RegisterRequest, MessageResponse>('auth/register', registerRequest);
 
 export const verifyUser = (verifyRequest: VerificationRequest) =>
@@ -78,6 +81,33 @@ export const forgotPassword = (forgotPasswordRequest: ForgotPasswordRequest) =>
 export const resetPassword = (resetPasswordRequest: ResetPasswordRequest) =>
     apiPostCall<ResetPasswordRequest, MessageResponse>('auth/reset-password', resetPasswordRequest);
 
-export const logoutUser = async(): Promise<void> => {
+export const logoutUser = async (): Promise<void> => {
     await clearAuthData();
 }
+
+export const getAllElections = (page = 0, size = 10, sort = 'electionUUID, asc') =>
+    apiGetCall<SpringPage<ElectionResponse>>(`elections?page=${page}&size=${size}&sort=${sort}`)
+
+export const getElectionById = (id: string) =>
+    apiGetCall<ElectionResponse>(`elections/${id}`)
+
+export const createElection = (createElectionRequest: ElectionRequest) =>
+    apiPostCall<ElectionRequest, ElectionResponse>('elections', createElectionRequest);
+
+export const updateElectionStatus = (id: string, updateElectionStatusRequest: ElectionStatusUpdateRequest) =>
+    apiPatchCall<ElectionStatusUpdateRequest, ElectionResponse>(`elections/${id}/status`, updateElectionStatusRequest);
+
+export const addCandidateToElection = (electionId: string, addCandidateRequest: CandidateRequest) => 
+    apiPostCall<CandidateRequest, CandidateResponse>(`elections/${electionId}/add-candidate`, addCandidateRequest);
+
+export const generateVotingToken = (electionId: string) =>
+    apiPostCall<Record<string, never>, VotingTokenResponse>(`votes/${electionId}/generate-token`, {});
+
+export const castVote = (electionId: string, castVoteRequest: VoteRequest) => 
+    apiPostCall<VoteRequest, VoteResponse>(`votes/${electionId}/vote`, castVoteRequest);
+
+export const getElectionResults = (electionId: string) =>
+    apiGetCall<ElectionResultResponse>(`votes/${electionId}/results`);
+
+export const getMyVoteHistory = (page = 0, size = 10, sort = 'votedAt, asc') => 
+    apiGetCall<SpringPage<VoterVoteHistoryResponse>>(`votes/my-votes?page=${page}&size=${size}&sort=${sort}`);
