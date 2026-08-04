@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { clearAuthData, getAuthToken, setAuthToken, setRole, setUsername } from './helper';
+import { clearAuthData, getAuthToken, setAuthToken, setRole, setUsername } from '../helper';
 
-import { SpringPage } from './types/api.types';
+import { SpringPage } from '../types/api.types';
 
 import type {
     LoginRequest,
@@ -11,14 +11,14 @@ import type {
     ResetPasswordRequest,
     VerificationRequest,
     MessageResponse
-} from './types/auth.types';
+} from '../types/auth.types';
 
 import type {
     VoteRequest,
     VoteResponse,
     VoterVoteHistoryResponse,
     VotingTokenResponse
-} from './types/vote.types';
+} from '../types/vote.types';
 
 import type {
     ElectionRequest,
@@ -27,7 +27,7 @@ import type {
     ElectionStatusUpdateRequest,
     CandidateRequest,
     CandidateResponse
-} from './types/election.types';
+} from '../types/election.types';
 
 const BASE_URL = 'http://10.0.2.2:3000/e-voting-rest-api/api/v1/';
 
