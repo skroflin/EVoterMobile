@@ -4,7 +4,7 @@ import {
     getAuthToken,
     getUsername,
     getRole
-} from '../helper';
+} from '../utils/helper';
 
 import type { LoginRequest } from '../types/auth.types';
 
