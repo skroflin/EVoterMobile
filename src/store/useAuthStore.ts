@@ -1,24 +1,12 @@
 import { create } from 'zustand';
-import { loginUser, logoutUser as apiLogout } from '../api/api';
+import { loginUser, registerUser, logoutUser as apiLogout } from '../api/api';
 import {
     getAuthToken,
     getUsername,
     getRole
 } from '../utils/helper';
 
-import type { LoginRequest } from '../types/auth.types';
-
-interface AuthState {
-    token: string | null;
-    username: string | null;
-    role: string | null;
-    isAuthenticated: boolean;
-    isLoading: boolean;
-
-    initializeAuth: () => Promise<void>;
-    login: (credentials: LoginRequest) => Promise<void>;
-    logout: () => Promise<void>;
-}
+import type { LoginRequest, RegisterRequest, AuthState } from '../types/auth.types';
 
 export const useAuthStore = create<AuthState>((set) => ({
     token: null,
@@ -71,6 +59,10 @@ export const useAuthStore = create<AuthState>((set) => ({
             role: response.role,
             isAuthenticated: true
         });
+    },
+
+    register: async (credentials: RegisterRequest) => {
+        await registerUser(credentials);
     },
 
     logout: async () => {

@@ -7,12 +7,12 @@ import {
     ActivityIndicator,
     Alert,
     StyleSheet,
-    SafeAreaViewBase
+    ScrollView
 } from "react-native";
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from "../../store/useAuthStore";
 import { loginSchema, LoginFormData } from "../../types/auth.types";
 import { AuthStackParamList } from "../../navigation/RootNavigator";
@@ -21,7 +21,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
     const login = useAuthStore((state) => state.login);
-    const [isSubitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const {
         control,
@@ -49,84 +49,92 @@ export default function LoginScreen({ navigation }: Props) {
     };
 
     return (
-        <SafeAreaViewBase>
-            <View style={styles.card}>
-                <Text style={styles.title}>Login</Text>
-                <Text style={styles.subtitle}>System for e-Voting</Text>
+        <SafeAreaView style={styles.container}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.card}>
+                    <Text style={styles.title}>Login</Text>
+                    <Text style={styles.subtitle}>System for e-Voting</Text>
 
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Username</Text>
-                    <Controller
-                        control={control}
-                        name="username"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <TextInput
-                                style={[styles.input, errors.username && styles.inputError]}
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                                autoCapitalize="none"
-                                placeholder="Insert your username..."
-                                placeholderTextColor="#94A3B8"
-                            />
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Username</Text>
+                        <Controller
+                            control={control}
+                            name="username"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <TextInput
+                                    style={[styles.input, errors.username && styles.inputError]}
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                    autoCapitalize="none"
+                                    placeholder="Insert your username..."
+                                    placeholderTextColor="#94A3B8"
+                                />
+                            )}
+                        />
+                        {errors.username && (
+                            <Text style={styles.errorText}>{errors.username.message}</Text>
                         )}
-                    />
-                    {errors.username && (
-                        <Text style={styles.errorText}>{errors.username.message}</Text>
-                    )}
-                </View>
+                    </View>
 
-                <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Password</Text>
-                    <Controller
-                        control={control}
-                        name="password"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <TextInput
-                                style={[styles.input, errors.password && styles.inputError]}
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                                secureTextEntry
-                                placeholder="Insert your password"
-                                placeholderTextColor="#94A3B8"
-                            />
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Password</Text>
+                        <Controller
+                            control={control}
+                            name="password"
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <TextInput
+                                    style={[styles.input, errors.password && styles.inputError]}
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                    secureTextEntry
+                                    placeholder="Insert your password"
+                                    placeholderTextColor="#94A3B8"
+                                />
+                            )}
+                        />
+                        {errors.password && (
+                            <Text style={styles.errorText}>{errors.password.message}</Text>
                         )}
-                    />
-                    {errors.password && (
-                        <Text style={styles.errorText}>{errors.password.message}</Text>
-                    )}
+                    </View>
+
+                    <TouchableOpacity
+                        style={styles.forgotPasswordContainer}
+                        onPress={() => navigation.navigate('ForgotPassword' as any)}
+                        disabled={isSubmitting}
+                    >
+                        <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.primaryButton}
+                        onPress={handleSubmit(onSubmit)}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? (
+                            <ActivityIndicator color="#FFFFFF" />
+                        ) : (
+                            <Text style={styles.primaryButtonText}>Login</Text>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.secondaryButton}
+                        onPress={() => navigation.navigate('Register')}
+                        disabled={isSubmitting}
+                    >
+                        <Text style={styles.secondaryButtonText}>
+                            No account? Register
+                        </Text>
+                    </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity
-                    style={styles.forgotPasswordContainer}
-                    onPress={() => navigation.navigate('ForgotPassword' as any)}
-                >
-                    <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.primaryButton}
-                    onPress={handleSubmit(onSubmit)}
-                    disabled={isSubitting}
-                >
-                    {isSubitting ? (
-                        <ActivityIndicator color="#FFFFFF" />
-                    ) : (
-                        <Text style={styles.primaryButtonText}>Login</Text>
-                    )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.secondaryButton}
-                    onPress={() => navigation.navigate('Register')}
-                >
-                    <Text style={styles.secondaryButtonText}>
-                        No account? Register
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaViewBase>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
@@ -134,9 +142,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F8FAFC',
+    },
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 16,
+        paddingVertical: 24,
     },
     card: {
         width: '100%',

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { clearAuthData, getAuthToken, setAuthToken, setRole, setUsername } from '../helper';
+import { clearAuthData, getAuthToken, setAuthToken, setRole, setUsername } from '../utils/helper';
 
 import { SpringPage } from '../types/api.types';
 
