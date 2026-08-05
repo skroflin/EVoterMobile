@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 export interface LoginRequest {
     username: string;
     password: string;
@@ -37,3 +39,14 @@ export interface ResetPasswordRequest {
 export interface ForgotPasswordRequest {
     email: string;
 }
+
+export const loginSchema = z.object({
+    username: z
+        .string()
+        .min(1, "Username is necessary"),
+    password: z
+        .string()
+        .min(6, "Password must contain at least 6 characters"),
+});
+
+export type LoginFormData = z.infer<typeof loginSchema>;

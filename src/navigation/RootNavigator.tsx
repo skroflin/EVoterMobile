@@ -17,6 +17,7 @@ import VoteScreen from '../screens/votes/VoteScreen';
 export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
+    ForgotPassword: undefined;
 };
 
 export type VoterTabParamList = {
