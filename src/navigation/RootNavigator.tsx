@@ -14,6 +14,9 @@ import ProfileScreen from '../screens/profile/ProfileScreen';
 import VoteHistoryScreen from '../screens/votes/VoteHistoryScreen';
 import VoteScreen from '../screens/votes/VoteScreen';
 
+import { IconOutline } from '@ant-design/icons-react-native'
+import { setOnUnauthorizedCallback } from '../api/axiosClient';
+
 export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
@@ -55,9 +58,36 @@ const VoterTabNavigator = () => (
         headerShown: true,
         tabBarActiveTintColor: '#2563EB'
     }}>
-        <VoterTab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profile' }} />
-        <VoterTab.Screen name="ElectionListTab" component={ElectionListScreen} options={{ title: 'Election List' }} />
-        <VoterTab.Screen name="MyVotesTab" component={VoteHistoryScreen} options={{ title: 'My Votes' }} />
+        <VoterTab.Screen
+            name="ProfileTab"
+            component={ProfileScreen}
+            options={{
+                title: 'Profile',
+                tabBarIcon: ({ color, size }) => (
+                    <IconOutline name="user" size={size} color={color} />
+                )
+            }}
+        />
+        <VoterTab.Screen
+            name="ElectionListTab"
+            component={ElectionListScreen}
+            options={{
+                title: 'Election List',
+                tabBarIcon: ({ color, size }) => (
+                    <IconOutline name='unordered-list' size={size} color={color} />
+                )
+            }}
+        />
+        <VoterTab.Screen
+            name="MyVotesTab"
+            component={VoteHistoryScreen}
+            options={{
+                title: 'My Votes',
+                tabBarIcon: ({ color, size }) => (
+                    <IconOutline name='check-square' size={size} color={color} />
+                )
+            }}
+        />
     </VoterTab.Navigator>
 )
 
@@ -66,9 +96,34 @@ const AdminTabNavigator = () => (
         headerShown: true,
         tabBarActiveTintColor: '#2563EB'
     }}>
-        <AdminTab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profile' }} />
-        <AdminTab.Screen name="ElectionListTab" component={ElectionListScreen} options={{ title: 'Election List' }} />
-        <AdminTab.Screen name="AddElectionTab" component={CreateElectionScreen} options={{ title: 'Add Election' }} />
+        <AdminTab.Screen
+            name="ProfileTab"
+            component={ProfileScreen}
+            options={{
+                title: 'Profile',
+                tabBarIcon: ({ color, size }) => (
+                    <IconOutline name="user" size={size} color={color} />
+                )
+            }}
+        />
+        <AdminTab.Screen
+            name="ElectionListTab"
+            component={ElectionListScreen}
+            options={{
+                title: 'Election List',
+                tabBarIcon: ({ color, size }) => (
+                    <IconOutline name='unordered-list' size={size} color={color} />
+                )
+            }} />
+        <AdminTab.Screen
+            name="AddElectionTab"
+            component={CreateElectionScreen}
+            options={{
+                title: 'Add Election',
+                tabBarIcon: ({ color, size }) => (
+                    <IconOutline name='plus-circle' size={size} color={color} />
+                )
+            }} />
     </AdminTab.Navigator>
 )
 
@@ -101,11 +156,16 @@ const MainAppNavigator = () => {
 };
 
 export const RootNavigator = () => {
-    const { isAuthenticated, isLoading, initializeAuth } = useAuthStore();
+    const { isAuthenticated, isLoading, initializeAuth, logout } = useAuthStore();
 
     useEffect(() => {
+
+        setOnUnauthorizedCallback(() => {
+            logout();
+        });
+
         initializeAuth();
-    }, []);
+    }, [initializeAuth, logout]);
 
     if (isLoading) {
         return (
