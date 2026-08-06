@@ -1,4 +1,9 @@
-export type ElectionStatus = 'Preparation' | 'Active' | 'Closed' | 'Unknown';
+export enum ElectionStatus {
+    PREPARATION = 'Preparation',
+    ACTIVE = 'Active',
+    CLOSED = 'Closed',
+    UNKNOWN = 'Unknown',
+}
 
 export interface CandidateRequest {
     name: string;

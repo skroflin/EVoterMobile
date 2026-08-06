@@ -28,6 +28,7 @@ import type {
     CandidateRequest,
     CandidateResponse
 } from '../types/election.types';
+import { ElectionFilter } from '../types/filters/ElectionFilter';
 
 const BASE_URL = 'http://10.0.2.2:3000/e-voting-rest-api/api/v1/';
 
@@ -85,8 +86,37 @@ export const logoutUser = async (): Promise<void> => {
     await clearAuthData();
 }
 
-export const getAllElections = (page = 0, size = 10, sort = 'electionUUID, asc') =>
-    apiGetCall<SpringPage<ElectionResponse>>(`elections?page=${page}&size=${size}&sort=${sort}`)
+export const getAllElections = (filter?: ElectionFilter, page = 0, size = 10, sort = 'createdAt,asc') => {
+    const params = new URLSearchParams();
+
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    params.append('sort', sort);
+
+    if (filter) {
+        if (filter.title?.trim()) {
+            params.append('title', filter.title.trim());
+        }
+
+        if (filter.status) {
+            params.append('status', filter.status);
+        }
+
+        if (filter.candidateName?.trim()) {
+            params.append('candidateName', filter.candidateName.trim());
+        }
+
+        if (filter.startDate) {
+            params.append('startDate', filter.startDate);
+        }
+
+        if (filter.endDate) {
+            params.append('endDate', filter.endDate);
+        }
+    }
+
+    return apiGetCall<SpringPage<ElectionResponse>>(`elections?${params.toString()}`);
+}
 
 export const getElectionById = (id: string) =>
     apiGetCall<ElectionResponse>(`elections/${id}`)
