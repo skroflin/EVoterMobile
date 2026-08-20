@@ -1,7 +1,213 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import Card from '../../components/Card';
+import StatusBadge from '../../components/StatusBadge';
+import ElectionFilterComponent from '../../components/ElectionFilter';
+import { getAllElections } from '../../api/api';
+import { ElectionResponse } from '../../types/election.types';
+import { ElectionFilter } from '../../types/filters/ElectionFilter';
+import { MainStackParamList } from '../../navigation/RootNavigator';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
+
+const INITIAL_FILTER: ElectionFilter = {
+  title: '',
+  candidateName: '',
+  status: undefined,
+  startDate: '',
+  endDate: '',
+};
+
 export default function ElectionListScreen() {
-    return (
-        <div>
-            Election List
-        </div>
-    );
+  const navigation = useNavigation<NavigationProp>();
+
+  const [elections, setElections] = useState<ElectionResponse[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [filter, setFilter] = useState<ElectionFilter>(INITIAL_FILTER);
+  const [showFilter, setShowFilter] = useState<boolean>(false);
+
+  const fetchElections = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    setError(null);
+
+    try {
+      const response = await getAllElections(filter, 0, 20, 'createdAt,desc');
+      setElections(response.content || []);
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message || 'Greška pri dohvaćanju popisa izbora.'
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [filter]);
+
+  useEffect(() => {
+    fetchElections();
+  }, [fetchElections]);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Izbori</Text>
+        <TouchableOpacity
+          style={styles.filterToggleButton}
+          onPress={() => setShowFilter((prev) => !prev)}
+        >
+          <Text style={styles.filterToggleText}>
+            {showFilter ? 'Sakrij filtere' : 'Filteri'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {showFilter && (
+        <View style={styles.filterContainer}>
+          <ElectionFilterComponent
+            filter={filter}
+            onChange={setFilter}
+            onReset={() => setFilter(INITIAL_FILTER)}
+          />
+        </View>
+      )}
+
+      {loading && !refreshing ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#2563EB" />
+        </View>
+      ) : error ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => fetchElections()}
+          >
+            <Text style={styles.retryText}>Pokušaj ponovno</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={elections}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => fetchElections(true)}
+              colors={['#2563EB']}
+            />
+          }
+          renderItem={({ item }) => (
+            <Card
+              style={styles.card}
+              onPress={() =>
+                navigation.navigate('ElectionDetails', { electionId: item.id })
+              }
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.electionTitle}>{item.title}</Text>
+                <StatusBadge status={item.status} />
+              </View>
+
+              <View style={styles.datesContainer}>
+                <Text style={styles.dateText}>
+                  Trajanje: {item.startDate} — {item.endDate}
+                </Text>
+              </View>
+
+              <Text style={styles.candidateCount}>
+                Broj kandidata: {item.candidates?.length ?? 0}
+              </Text>
+            </Card>
+          )}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Nema pronađenih izbora.</Text>
+            </View>
+          }
+        />
+      )}
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A' },
+  filterToggleButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: '#F1F5F9',
+  },
+  filterToggleText: { fontSize: 13, fontWeight: '600', color: '#2563EB' },
+  filterContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  listContent: { padding: 16 },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  card: { marginBottom: 12 },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 8,
+  },
+  electionTitle: { fontSize: 16, fontWeight: '700', color: '#0F172A', flex: 1 },
+  datesContainer: { marginBottom: 6 },
+  dateText: { fontSize: 13, color: '#64748B' },
+  candidateCount: { fontSize: 12, fontWeight: '600', color: '#94A3B8' },
+  errorText: {
+    fontSize: 14,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  retryText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
+  emptyContainer: { padding: 32, alignItems: 'center' },
+  emptyText: { fontSize: 14, color: '#94A3B8' },
+});

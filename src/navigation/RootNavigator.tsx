@@ -16,6 +16,7 @@ import VoteScreen from '../screens/votes/VoteScreen';
 
 import { IconOutline } from '@ant-design/icons-react-native'
 import { setOnUnauthorizedCallback } from '../api/axiosClient';
+import ForgotPassword from '../screens/auth/ForgotPasswordScreen';
 
 export type AuthStackParamList = {
     Login: undefined;
@@ -50,6 +51,7 @@ const AuthNavigator = () => (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
         <AuthStack.Screen name="Login" component={LoginScreen} />
         <AuthStack.Screen name="Register" component={RegisterScreen} />
+        <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
     </AuthStack.Navigator>
 )
 

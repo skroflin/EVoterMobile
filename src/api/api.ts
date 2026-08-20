@@ -139,5 +139,12 @@ export const castVote = (electionId: string, castVoteRequest: VoteRequest) =>
 export const getElectionResults = (electionId: string) =>
     apiGetCall<ElectionResultResponse>(`votes/${electionId}/results`);
 
-export const getMyVoteHistory = (page = 0, size = 10, sort = 'votedAt, asc') => 
-    apiGetCall<SpringPage<VoterVoteHistoryResponse>>(`votes/my-votes?page=${page}&size=${size}&sort=${sort}`);
+export const getMyVoteHistory = (page = 0, size = 10, sort = 'votedAt,asc') => {
+    const params = new URLSearchParams();
+
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    params.append('sort', sort);
+
+    return apiGetCall<SpringPage<VoterVoteHistoryResponse>>(`votes/my-votes?${params.toString()}`);
+};

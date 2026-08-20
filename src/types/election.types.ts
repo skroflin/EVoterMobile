@@ -31,6 +31,8 @@ export interface ElectionResponse {
     startDate: string;
     endDate: string;
     candidates: CandidateResponse[];
+    isActive?: boolean;
+    status?: ElectionStatus
 }
 
 export interface CandidateResultResponse {
