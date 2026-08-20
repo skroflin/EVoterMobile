@@ -3,44 +3,47 @@ import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { IconOutline } from '@ant-design/icons-react-native';
 
 import { useAuthStore } from '../store/useAuthStore';
-import CreateElectionScreen from '../screens/admin/CreateElectionScreen';
+import { setOnUnauthorizedCallback } from '../api/axiosClient';
+
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
+
+import CreateElectionScreen from '../screens/admin/CreateElectionScreen';
 import ElectionDetailsScreen from '../screens/elections/ElectionDetailsScreen';
 import ElectionListScreen from '../screens/elections/ElectionListScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import VoteHistoryScreen from '../screens/votes/VoteHistoryScreen';
-import VoteScreen from '../screens/votes/VoteScreen';
-
-import { IconOutline } from '@ant-design/icons-react-native'
-import { setOnUnauthorizedCallback } from '../api/axiosClient';
-import ForgotPassword from '../screens/auth/ForgotPasswordScreen';
+import VoteScreen, { Election } from '../screens/votes/VoteScreen';
 
 export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
     ForgotPassword: undefined;
+    ResetPassword: { email?: string } | undefined;
 };
 
 export type VoterTabParamList = {
     ProfileTab: undefined;
     ElectionListTab: undefined;
     MyVotesTab: undefined;
-}
+};
 
 export type AdminTabParamList = {
     ProfileTab: undefined;
     ElectionListTab: undefined;
     AddElectionTab: undefined;
-}
+};
 
 export type MainStackParamList = {
     MainTabs: undefined;
     VoteScreen: { electionId: string, electionTitle: string };
     ElectionDetails: { electionId: string };
-}
+};
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const VoterTab = createBottomTabNavigator<VoterTabParamList>();
@@ -51,15 +54,19 @@ const AuthNavigator = () => (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
         <AuthStack.Screen name="Login" component={LoginScreen} />
         <AuthStack.Screen name="Register" component={RegisterScreen} />
-        <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
+        <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+        <AuthStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </AuthStack.Navigator>
-)
+);
 
 const VoterTabNavigator = () => (
-    <VoterTab.Navigator initialRouteName="ElectionListTab" screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: '#2563EB'
-    }}>
+    <VoterTab.Navigator
+        initialRouteName="ElectionListTab"
+        screenOptions={{
+            headerShown: true,
+            tabBarActiveTintColor: '#2563EB',
+        }}
+    >
         <VoterTab.Screen
             name="ProfileTab"
             component={ProfileScreen}
@@ -67,7 +74,7 @@ const VoterTabNavigator = () => (
                 title: 'Profile',
                 tabBarIcon: ({ color, size }) => (
                     <IconOutline name="user" size={size} color={color} />
-                )
+                ),
             }}
         />
         <VoterTab.Screen
@@ -76,8 +83,8 @@ const VoterTabNavigator = () => (
             options={{
                 title: 'Election List',
                 tabBarIcon: ({ color, size }) => (
-                    <IconOutline name='unordered-list' size={size} color={color} />
-                )
+                    <IconOutline name="unordered-list" size={size} color={color} />
+                ),
             }}
         />
         <VoterTab.Screen
@@ -86,18 +93,21 @@ const VoterTabNavigator = () => (
             options={{
                 title: 'My Votes',
                 tabBarIcon: ({ color, size }) => (
-                    <IconOutline name='check-square' size={size} color={color} />
-                )
+                    <IconOutline name="check-square" size={size} color={color} />
+                ),
             }}
         />
     </VoterTab.Navigator>
-)
+);
 
 const AdminTabNavigator = () => (
-    <AdminTab.Navigator initialRouteName="ElectionListTab" screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: '#2563EB'
-    }}>
+    <AdminTab.Navigator
+        initialRouteName="ElectionListTab"
+        screenOptions={{
+            headerShown: true,
+            tabBarActiveTintColor: '#2563EB',
+        }}
+    >
         <AdminTab.Screen
             name="ProfileTab"
             component={ProfileScreen}
@@ -105,7 +115,7 @@ const AdminTabNavigator = () => (
                 title: 'Profile',
                 tabBarIcon: ({ color, size }) => (
                     <IconOutline name="user" size={size} color={color} />
-                )
+                ),
             }}
         />
         <AdminTab.Screen
@@ -114,20 +124,22 @@ const AdminTabNavigator = () => (
             options={{
                 title: 'Election List',
                 tabBarIcon: ({ color, size }) => (
-                    <IconOutline name='unordered-list' size={size} color={color} />
-                )
-            }} />
+                    <IconOutline name="unordered-list" size={size} color={color} />
+                ),
+            }}
+        />
         <AdminTab.Screen
             name="AddElectionTab"
             component={CreateElectionScreen}
             options={{
                 title: 'Add Election',
                 tabBarIcon: ({ color, size }) => (
-                    <IconOutline name='plus-circle' size={size} color={color} />
-                )
-            }} />
+                    <IconOutline name="plus-circle" size={size} color={color} />
+                ),
+            }}
+        />
     </AdminTab.Navigator>
-)
+);
 
 const MainAppNavigator = () => {
     const role = useAuthStore((state) => state.role);
@@ -161,7 +173,6 @@ export const RootNavigator = () => {
     const { isAuthenticated, isLoading, initializeAuth, logout } = useAuthStore();
 
     useEffect(() => {
-
         setOnUnauthorizedCallback(() => {
             logout();
         });
@@ -182,4 +193,4 @@ export const RootNavigator = () => {
             {isAuthenticated ? <MainAppNavigator /> : <AuthNavigator />}
         </NavigationContainer>
     );
-}
+};
