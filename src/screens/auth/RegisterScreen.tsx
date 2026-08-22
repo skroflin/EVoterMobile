@@ -44,29 +44,13 @@ export default function RegisterScreen({ navigation }: Props) {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    if (!data.email.toLowerCase().endsWith('@ffos.hr')) {
-      Toast.show({
-        type: 'error',
-        text1: 'Only @ffos.hr email domain is allowed.',
-      });
-      return;
-    }
-
-    if (data.password.length < 8) {
-      Toast.show({
-        type: 'error',
-        text1: 'The password must have at least 8 characters.',
-      });
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       await register({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        username: data.username,
-        email: data.email,
+        firstName: data.firstName.trim(),
+        lastName: data.lastName.trim(),
+        username: data.username.trim(),
+        email: data.email.trim(),
         password: data.password,
       });
 
@@ -75,7 +59,7 @@ export default function RegisterScreen({ navigation }: Props) {
         text1: 'Registration successful! Please verify your email.',
       });
 
-      navigation.navigate('Verification' as any, { email: data.email });
+      navigation.navigate('Verification' as any, { email: data.email.trim() });
     } catch (error: any) {
       const apiError = error?.response?.data;
       const message =
@@ -123,6 +107,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   value={value}
                   placeholder="Enter your first name"
                   placeholderTextColor="#94A3B8"
+                  maxLength={50}
                   editable={!isSubmitting}
                 />
               )}
@@ -143,6 +128,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   value={value}
                   placeholder="Enter your last name"
                   placeholderTextColor="#94A3B8"
+                  maxLength={50}
                   editable={!isSubmitting}
                 />
               )}
@@ -165,6 +151,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   autoCorrect={false}
                   placeholder="Enter your username"
                   placeholderTextColor="#94A3B8"
+                  maxLength={50}
                   editable={!isSubmitting}
                 />
               )}
@@ -188,6 +175,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   autoCorrect={false}
                   placeholder="user@ffos.hr"
                   placeholderTextColor="#94A3B8"
+                  maxLength={100}
                   editable={!isSubmitting}
                 />
               )}
@@ -207,8 +195,9 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={onChange}
                   value={value}
                   secureTextEntry
-                  placeholder="Minimum 8 characters"
+                  placeholder="Minimum 8, maximum 100 characters"
                   placeholderTextColor="#94A3B8"
+                  maxLength={100}
                   editable={!isSubmitting}
                 />
               )}
@@ -233,6 +222,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   secureTextEntry
                   placeholder="Re-enter your password"
                   placeholderTextColor="#94A3B8"
+                  maxLength={100}
                   editable={!isSubmitting}
                 />
               )}

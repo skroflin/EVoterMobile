@@ -41,7 +41,6 @@ export default function VoteScreen() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Dohvaćanje glasačkog tokena pri ulasku na ekran
     useEffect(() => {
         if (!election?.id) return;
 
@@ -51,8 +50,6 @@ export default function VoteScreen() {
                 setError(null);
 
                 const response = await generateVotingToken(election.id.toString());
-
-                // Ako response izravno vraća polje token (ili VotingTokenResponse objekt)
                 const tokenValue = typeof response === 'string' ? response : (response as any)?.token;
                 setVotingToken(tokenValue);
             } catch (err: any) {

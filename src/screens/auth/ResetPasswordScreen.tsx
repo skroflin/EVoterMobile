@@ -77,9 +77,6 @@ export default function ResetPasswordScreen() {
         index: 0,
         routes: [{ name: 'Login' }],
       });
-
-      console.log(navigation);
-
     } catch (err: any) {
       const apiError = err?.response?.data;
 

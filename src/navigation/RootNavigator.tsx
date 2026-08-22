@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { IconOutline } from '@ant-design/icons-react-native';
 
 import { User, List, CheckSquare, PlusCircle } from 'lucide-react-native';
 
