@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { IconOutline } from '@ant-design/icons-react-native';
+import { Calendar, Clock, Plus, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 
@@ -207,14 +207,14 @@ export default function CreateElectionScreen() {
                 style={styles.dateButton}
                 onPress={() => setShowPicker({ target: 'start', mode: 'date' })}
               >
-                <IconOutline name="calendar" size={18} color="#2563EB" />
+                <Calendar size={18} color="#2563EB" />
                 <Text style={styles.dateButtonText}>{formatDate(startDate)}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.timeIconButton}
                 onPress={() => setShowPicker({ target: 'start', mode: 'time' })}
               >
-                <IconOutline name="clock-circle" size={18} color="#2563EB" />
+                <Clock size={18} color="#2563EB" />
               </TouchableOpacity>
             </View>
 
@@ -224,14 +224,14 @@ export default function CreateElectionScreen() {
                 style={styles.dateButton}
                 onPress={() => setShowPicker({ target: 'end', mode: 'date' })}
               >
-                <IconOutline name="calendar" size={18} color="#2563EB" />
+                <Calendar size={18} color="#2563EB" />
                 <Text style={styles.dateButtonText}>{formatDate(endDate)}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.timeIconButton}
                 onPress={() => setShowPicker({ target: 'end', mode: 'time' })}
               >
-                <IconOutline name="clock-circle" size={18} color="#2563EB" />
+                <Clock size={18} color="#2563EB" />
               </TouchableOpacity>
             </View>
 
@@ -259,7 +259,7 @@ export default function CreateElectionScreen() {
             <View style={styles.candidateHeaderRow}>
               <Text style={styles.sectionHeader}>Kandidati ({candidates.length})</Text>
               <TouchableOpacity style={styles.addCandidateButton} onPress={addCandidate}>
-                <IconOutline name="plus" size={16} color="#2563EB" />
+                <Plus size={16} color="#2563EB" />
                 <Text style={styles.addCandidateText}>Dodaj</Text>
               </TouchableOpacity>
             </View>
@@ -270,7 +270,7 @@ export default function CreateElectionScreen() {
                   <Text style={styles.candidateNumber}># {index + 1}</Text>
                   {candidates.length > 2 && (
                     <TouchableOpacity onPress={() => removeCandidate(index)}>
-                      <IconOutline name="delete" size={18} color="#EF4444" />
+                      <Trash2 size={18} color="#EF4444" />
                     </TouchableOpacity>
                   )}
                 </View>

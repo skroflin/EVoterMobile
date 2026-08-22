@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { IconOutline } from '@ant-design/icons-react-native';
 
+import { User, List, CheckSquare, PlusCircle } from 'lucide-react-native';
+
 import { useAuthStore } from '../store/useAuthStore';
 import { setOnUnauthorizedCallback } from '../api/axiosClient';
 
@@ -74,9 +76,7 @@ const VoterTabNavigator = () => (
             component={ProfileScreen}
             options={{
                 title: 'Profile',
-                tabBarIcon: ({ color, size }) => (
-                    <IconOutline name="user" size={size} color={color} />
-                ),
+                tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
             }}
         />
         <VoterTab.Screen
@@ -84,9 +84,7 @@ const VoterTabNavigator = () => (
             component={ElectionListScreen}
             options={{
                 title: 'Election List',
-                tabBarIcon: ({ color, size }) => (
-                    <IconOutline name="unordered-list" size={size} color={color} />
-                ),
+                tabBarIcon: ({ color, size }) => <List size={size} color={color} />,
             }}
         />
         <VoterTab.Screen
@@ -94,9 +92,7 @@ const VoterTabNavigator = () => (
             component={VoteHistoryScreen}
             options={{
                 title: 'My Votes',
-                tabBarIcon: ({ color, size }) => (
-                    <IconOutline name="check-square" size={size} color={color} />
-                ),
+                tabBarIcon: ({ color, size }) => <CheckSquare size={size} color={color} />,
             }}
         />
     </VoterTab.Navigator>
@@ -115,9 +111,7 @@ const AdminTabNavigator = () => (
             component={ProfileScreen}
             options={{
                 title: 'Profile',
-                tabBarIcon: ({ color, size }) => (
-                    <IconOutline name="user" size={size} color={color} />
-                ),
+                tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
             }}
         />
         <AdminTab.Screen
@@ -125,9 +119,7 @@ const AdminTabNavigator = () => (
             component={ElectionListScreen}
             options={{
                 title: 'Election List',
-                tabBarIcon: ({ color, size }) => (
-                    <IconOutline name="unordered-list" size={size} color={color} />
-                ),
+                tabBarIcon: ({ color, size }) => <List size={size} color={color} />,
             }}
         />
         <AdminTab.Screen
@@ -135,48 +127,46 @@ const AdminTabNavigator = () => (
             component={CreateElectionScreen}
             options={{
                 title: 'Add Election',
-                tabBarIcon: ({ color, size }) => (
-                    <IconOutline name="plus-circle" size={size} color={color} />
-                ),
+                tabBarIcon: ({ color, size }) => <PlusCircle size={size} color={color} />,
             }}
         />
     </AdminTab.Navigator>
 );
 
 const MainAppNavigator = () => {
-  const role = useAuthStore((state) => state.role);
-  const isAdmin = role ? role.toUpperCase().includes('ADMIN') : false;
+    const role = useAuthStore((state) => state.role);
+    const isAdmin = role ? role.toUpperCase().includes('ADMIN') : false;
 
-  return (
-    <MainStack.Navigator key={isAdmin ? 'admin-stack' : 'voter-stack'}>
-      {isAdmin ? (
-        <MainStack.Screen
-          name="MainTabs"
-          component={AdminTabNavigator}
-          options={{ headerShown: false }}
-        />
-      ) : (
-        <MainStack.Screen
-          name="MainTabs"
-          component={VoterTabNavigator}
-          options={{ headerShown: false }}
-        />
-      )}
-      <MainStack.Screen
-        name="VoteScreen"
-        component={VoteScreen}
-        options={({ route }) => ({
-          title: route.params.electionTitle || 'Voting',
-          headerBackTitle: 'Back',
-        })}
-      />
-      <MainStack.Screen
-        name="ElectionDetails"
-        component={ElectionDetailsScreen}
-        options={{ title: 'Election Details' }}
-      />
-    </MainStack.Navigator>
-  );
+    return (
+        <MainStack.Navigator key={isAdmin ? 'admin-stack' : 'voter-stack'}>
+            {isAdmin ? (
+                <MainStack.Screen
+                    name="MainTabs"
+                    component={AdminTabNavigator}
+                    options={{ headerShown: false }}
+                />
+            ) : (
+                <MainStack.Screen
+                    name="MainTabs"
+                    component={VoterTabNavigator}
+                    options={{ headerShown: false }}
+                />
+            )}
+            <MainStack.Screen
+                name="VoteScreen"
+                component={VoteScreen}
+                options={({ route }) => ({
+                    title: route.params.electionTitle || 'Voting',
+                    headerBackTitle: 'Back',
+                })}
+            />
+            <MainStack.Screen
+                name="ElectionDetails"
+                component={ElectionDetailsScreen}
+                options={{ title: 'Election Details' }}
+            />
+        </MainStack.Navigator>
+    );
 };
 
 export const RootNavigator = () => {
