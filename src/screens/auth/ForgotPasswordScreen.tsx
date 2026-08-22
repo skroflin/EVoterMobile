@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 import Card from '../../components/Card';
 import { forgotPassword } from '../../api/api';
@@ -22,40 +23,45 @@ export default function ForgotPasswordScreen() {
 
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    if (!email.trim()) {
-      setError('Molimo unesite e-mail adresu.');
+    const trimmedEmail = email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmedEmail) {
+      (Toast as any).error('Please enter your email address.');
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      setError('Unesite ispravnu e-mail adresu.');
+    if (!emailRegex.test(trimmedEmail)) {
+      (Toast as any).error('Please enter a valid email address.');
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setError(null);
       setSuccessMessage(null);
 
       const requestPayload: ForgotPasswordRequest = {
-        email: email.trim(),
+        email: trimmedEmail,
       };
 
       const response = await forgotPassword(requestPayload);
 
-      setSuccessMessage(
-        response?.message || 'Upute za oporavak lozinke poslane su na vaš e-mail.'
-      );
+      const successMsg =
+        response?.message ||
+        'Password reset instructions have been sent to your email.';
+
+      (Toast as any).success(successMsg);
+      setSuccessMessage(successMsg);
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
-        'Došlo je do pogreške prilikom slanja zahtjeva. Pokušajte ponovno.';
-      setError(msg);
+        (typeof err?.response?.data === 'string' ? err.response.data : null) ||
+        'An error occurred while sending the request. Please try again.';
+
+      (Toast as any).error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,17 +78,11 @@ export default function ForgotPasswordScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Zaboravljena lozinka</Text>
+            <Text style={styles.title}>Forgot Password</Text>
             <Text style={styles.subtitle}>
-              Unesite e-mail adresu povezanu s vašim računom kako bismo vam poslali kod za ponovno postavljanje lozinke.
+              Enter the email address associated with your account to receive a reset code.
             </Text>
           </View>
-
-          {error && (
-            <View style={styles.errorCard}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          )}
 
           {successMessage && (
             <View style={styles.successCard}>
@@ -91,16 +91,13 @@ export default function ForgotPasswordScreen() {
           )}
 
           <Card style={styles.card}>
-            <Text style={styles.label}>E-mail adresa *</Text>
+            <Text style={styles.label}>Email Address *</Text>
             <TextInput
               style={styles.input}
-              placeholder="korisnik@domena.com"
+              placeholder="user@ffos.hr"
               placeholderTextColor="#94A3B8"
               value={email}
-              onChangeText={(text) => {
-                setEmail(text);
-                if (error) setError(null);
-              }}
+              onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -119,7 +116,7 @@ export default function ForgotPasswordScreen() {
               {isSubmitting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.submitButtonText}>Pošalji zahtjev</Text>
+                <Text style={styles.submitButtonText}>Send Request</Text>
               )}
             </TouchableOpacity>
           </Card>
@@ -134,7 +131,7 @@ export default function ForgotPasswordScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.resetNavButtonText}>
-                  Unesite kod i ponovno postavite lozinku →
+                  Enter code and reset password →
                 </Text>
               </TouchableOpacity>
             )}
@@ -144,7 +141,7 @@ export default function ForgotPasswordScreen() {
               onPress={() => navigation.goBack()}
               activeOpacity={0.7}
             >
-              <Text style={styles.backButtonText}>Povratak na prijavu</Text>
+              <Text style={styles.backButtonText}>Back to login</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -210,19 +207,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  errorCard: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-    marginBottom: 16,
-    padding: 12,
-    borderRadius: 8,
-  },
-  errorText: {
-    color: '#991B1B',
-    fontSize: 13,
-    textAlign: 'center',
   },
   successCard: {
     backgroundColor: '#F0FDF4',

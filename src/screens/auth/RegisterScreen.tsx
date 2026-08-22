@@ -3,17 +3,20 @@ import {
   View,
   Text,
   TextInput,
-  Alert,
+  TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import Card from '../../components/Card';
-import Button from '../../components/Button';
 import { useAuthStore } from '../../store/useAuthStore';
 import { registerSchema, RegisterFormData } from '../../types/auth.types';
 import { AuthStackParamList } from '../../navigation/RootNavigator';
@@ -41,6 +44,22 @@ export default function RegisterScreen({ navigation }: Props) {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
+    if (!data.email.toLowerCase().endsWith('@ffos.hr')) {
+      Toast.show({
+        type: 'error',
+        text1: 'Only @ffos.hr email domain is allowed.',
+      });
+      return;
+    }
+
+    if (data.password.length < 8) {
+      Toast.show({
+        type: 'error',
+        text1: 'The password must have at least 8 characters.',
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       await register({
@@ -50,36 +69,49 @@ export default function RegisterScreen({ navigation }: Props) {
         email: data.email,
         password: data.password,
       });
-      Alert.alert(
-        'Registration successful.',
-        'You account was successfully created, you may login now.',
-        [{ text: 'Okay', onPress: () => navigation.navigate('Login') }]
-      );
+
+      Toast.show({
+        type: 'success',
+        text1: 'Registration successful! Please verify your email.',
+      });
+
+      navigation.navigate('Verification' as any, { email: data.email });
     } catch (error: any) {
+      const apiError = error?.response?.data;
       const message =
-        error?.response?.data?.message ||
-        'An error occured while registration.';
-      Alert.alert('Error upon registration', message);
+        typeof apiError === 'string'
+          ? apiError
+          : apiError?.message || 'An error occurred during registration.';
+
+      Toast.show({
+        type: 'error',
+        text1: message,
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
       >
-        <Card style={styles.card}>
-          <Text style={styles.title}>Registration</Text>
-          <Text style={styles.subtitle}>
-            Create an account for e-Voting system
-          </Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>
+              Create an account for e-Voting system.
+            </Text>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>First name</Text>
+          <Card style={styles.card}>
+            <Text style={styles.label}>First Name *</Text>
             <Controller
               control={control}
               name="firstName"
@@ -89,18 +121,17 @@ export default function RegisterScreen({ navigation }: Props) {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  placeholder="Enter your first name..."
+                  placeholder="Enter your first name"
                   placeholderTextColor="#94A3B8"
+                  editable={!isSubmitting}
                 />
               )}
             />
             {errors.firstName && (
               <Text style={styles.errorText}>{errors.firstName.message}</Text>
             )}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Last name</Text>
+            <Text style={styles.label}>Last Name *</Text>
             <Controller
               control={control}
               name="lastName"
@@ -110,18 +141,17 @@ export default function RegisterScreen({ navigation }: Props) {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  placeholder="Enter your last name..."
+                  placeholder="Enter your last name"
                   placeholderTextColor="#94A3B8"
+                  editable={!isSubmitting}
                 />
               )}
             />
             {errors.lastName && (
               <Text style={styles.errorText}>{errors.lastName.message}</Text>
             )}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
+            <Text style={styles.label}>Username *</Text>
             <Controller
               control={control}
               name="username"
@@ -132,18 +162,18 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={onChange}
                   value={value}
                   autoCapitalize="none"
-                  placeholder="Enter your username..."
+                  autoCorrect={false}
+                  placeholder="Enter your username"
                   placeholderTextColor="#94A3B8"
+                  editable={!isSubmitting}
                 />
               )}
             />
             {errors.username && (
               <Text style={styles.errorText}>{errors.username.message}</Text>
             )}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>E-mail address</Text>
+            <Text style={styles.label}>E-mail Address *</Text>
             <Controller
               control={control}
               name="email"
@@ -155,18 +185,18 @@ export default function RegisterScreen({ navigation }: Props) {
                   value={value}
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  placeholder="Enter your email address..."
+                  autoCorrect={false}
+                  placeholder="user@ffos.hr"
                   placeholderTextColor="#94A3B8"
+                  editable={!isSubmitting}
                 />
               )}
             />
             {errors.email && (
               <Text style={styles.errorText}>{errors.email.message}</Text>
             )}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>Password *</Text>
             <Controller
               control={control}
               name="password"
@@ -177,18 +207,17 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={onChange}
                   value={value}
                   secureTextEntry
-                  placeholder="Enter your password..."
+                  placeholder="Minimum 8 characters"
                   placeholderTextColor="#94A3B8"
+                  editable={!isSubmitting}
                 />
               )}
             />
             {errors.password && (
               <Text style={styles.errorText}>{errors.password.message}</Text>
             )}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm password</Text>
+            <Text style={styles.label}>Confirm Password *</Text>
             <Controller
               control={control}
               name="confirmPassword"
@@ -202,8 +231,9 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={onChange}
                   value={value}
                   secureTextEntry
-                  placeholder="Confirm your password..."
+                  placeholder="Re-enter your password"
                   placeholderTextColor="#94A3B8"
+                  editable={!isSubmitting}
                 />
               )}
             />
@@ -212,25 +242,35 @@ export default function RegisterScreen({ navigation }: Props) {
                 {errors.confirmPassword.message}
               </Text>
             )}
-          </View>
 
-          <Button
-            title="Register"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            disabled={isSubmitting}
-            style={styles.primaryButton}
-          />
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isSubmitting && styles.submitButtonDisabled,
+              ]}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              activeOpacity={0.8}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.submitButtonText}>Sign Up</Text>
+              )}
+            </TouchableOpacity>
+          </Card>
 
-          <Button
-            title="Already have an account? Login"
-            variant="secondary"
+          <TouchableOpacity
+            style={styles.backButton}
             onPress={() => navigation.navigate('Login')}
-            disabled={isSubmitting}
-            style={styles.secondaryButton}
-          />
-        </Card>
-      </ScrollView>
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>
+              Already have an account? <Text style={styles.linkBold}>Log in</Text>
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -241,48 +281,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 24,
+    paddingBottom: 32,
   },
-  card: {
-    width: '100%',
-    maxWidth: 400,
-    padding: 24,
+  header: {
+    paddingVertical: 24,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#0F172A',
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#64748B',
-    textAlign: 'center',
-    marginBottom: 20,
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 20,
   },
-  inputGroup: {
-    marginBottom: 12,
+  card: {
+    padding: 16,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: '#334155',
     marginBottom: 6,
+    marginTop: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
+    backgroundColor: '#F1F5F9',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    backgroundColor: '#FFFFFF',
     color: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   inputError: {
     borderColor: '#EF4444',
@@ -292,10 +327,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  primaryButton: {
-    marginTop: 12,
+  submitButton: {
+    backgroundColor: '#2563EB',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
   },
-  secondaryButton: {
-    marginTop: 16,
+  submitButtonDisabled: {
+    backgroundColor: '#94A3B8',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  backButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  linkBold: {
+    color: '#0F172A',
+    fontWeight: '600',
   },
 });

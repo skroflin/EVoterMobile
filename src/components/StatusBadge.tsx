@@ -3,17 +3,19 @@ import { View, Text, StyleSheet } from 'react-native';
 import { ElectionStatus } from '../types/election.types';
 
 interface Props {
-  status?: ElectionStatus;
+  status?: ElectionStatus | string;
 }
 
 export default function StatusBadge({ status }: Props) {
+  const normalizedStatus = status?.toString().toUpperCase();
+
   const getBadgeConfig = () => {
-    switch (status) {
-      case ElectionStatus.ACTIVE:
+    switch (normalizedStatus) {
+      case 'ACTIVE':
         return { bg: '#E0F2FE', text: '#0284C7', label: 'Aktivno' };
-      case ElectionStatus.PREPARATION:
+      case 'PREPARATION':
         return { bg: '#FEF3C7', text: '#D97706', label: 'U pripremi' };
-      case ElectionStatus.CLOSED:
+      case 'CLOSED':
         return { bg: '#F1F5F9', text: '#64748B', label: 'Završeno' };
       default:
         return { bg: '#F3F4F6', text: '#9CA3AF', label: 'Nepoznato' };
@@ -24,7 +26,9 @@ export default function StatusBadge({ status }: Props) {
 
   return (
     <View style={[styles.badge, { backgroundColor: config.bg }]}>
-      <Text style={[styles.badgeText, { color: config.text }]}>{config.label}</Text>
+      <Text style={[styles.badgeText, { color: config.text }]}>
+        {config.label}
+      </Text>
     </View>
   );
 }

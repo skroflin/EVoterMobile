@@ -4,132 +4,150 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
 } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 
 import Card from '../../components/Card';
-import Button from '../../components/Button';
+import { loginUser } from '../../api/api';
 import { useAuthStore } from '../../store/useAuthStore';
-import { loginSchema, LoginFormData } from '../../types/auth.types';
 import { AuthStackParamList } from '../../navigation/RootNavigator';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
+type LoginNavProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
 
-export default function LoginScreen({ navigation }: Props) {
-  const login = useAuthStore((state) => state.login);
+export default function LoginScreen() {
+  const navigation = useNavigation<LoginNavProp>();
+  const initializeAuth = useAuthStore((state) => state.initializeAuth);
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: '',
-      password: '',
-    },
-  });
+  const handleLogin = async () => {
+    const trimmedUsername = username.trim();
 
-  const onSubmit = async (data: LoginFormData) => {
+    if (!trimmedUsername || !password) {
+      Toast.show({
+        type: 'error',
+        text1: 'Username and password are required.',
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      await login(data);
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message || 'Incorrect login data.';
-      Alert.alert('Login error', message);
+
+      await loginUser({
+        username: trimmedUsername,
+        password,
+      });
+
+      Toast.show({
+        type: 'success',
+        text1: 'Successfully logged in!',
+      });
+
+      await initializeAuth();
+    } catch (err: any) {
+      const apiError = err?.response?.data;
+
+      const errorMessage =
+        typeof apiError === 'string'
+          ? apiError
+          : apiError?.message || 'Invalid username or password. Please try again.';
+
+      Toast.show({
+        type: 'error',
+        text1: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
       >
-        <Card style={styles.card}>
-          <Text style={styles.title}>Login</Text>
-          <Text style={styles.subtitle}>System for e-Voting</Text>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
-            <Controller
-              control={control}
-              name="username"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={[styles.input, errors.username && styles.inputError]}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  autoCapitalize="none"
-                  placeholder="Insert your username..."
-                  placeholderTextColor="#94A3B8"
-                />
-              )}
-            />
-            {errors.username && (
-              <Text style={styles.errorText}>{errors.username.message}</Text>
-            )}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>
+              Sign in to your account to continue.
+            </Text>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={[styles.input, errors.password && styles.inputError]}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  secureTextEntry
-                  placeholder="Insert your password"
-                  placeholderTextColor="#94A3B8"
-                />
-              )}
+          <Card style={styles.card}>
+            <Text style={styles.label}>Username *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your username"
+              placeholderTextColor="#94A3B8"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isSubmitting}
             />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password.message}</Text>
-            )}
-          </View>
+
+            <Text style={styles.label}>Password *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password"
+              placeholderTextColor="#94A3B8"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              editable={!isSubmitting}
+            />
+
+            <TouchableOpacity
+              style={styles.forgotPasswordContainer}
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isSubmitting && styles.submitButtonDisabled,
+              ]}
+              onPress={handleLogin}
+              disabled={isSubmitting}
+              activeOpacity={0.8}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.submitButtonText}>Log In</Text>
+              )}
+            </TouchableOpacity>
+          </Card>
 
           <TouchableOpacity
-            style={styles.forgotPasswordContainer}
-            onPress={() => navigation.navigate('ForgotPassword' as any)}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
-          </TouchableOpacity>
-
-          <Button
-            title="Login"
-            onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            disabled={isSubmitting}
-            style={styles.primaryButton}
-          />
-
-          <Button
-            title="No account? Register"
-            variant="secondary"
+            style={styles.backButton}
             onPress={() => navigation.navigate('Register')}
-            disabled={isSubmitting}
-            style={styles.secondaryButton}
-          />
-        </Card>
-      </ScrollView>
+            activeOpacity={0.7}
+          >
+            <Text style={styles.backButtonText}>
+              Don't have an account? <Text style={styles.linkBold}>Sign up</Text>
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -140,70 +158,80 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 24,
+    paddingBottom: 32,
   },
-  card: {
-    width: '100%',
-    maxWidth: 400,
-    padding: 24,
+  header: {
+    paddingVertical: 24,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#0F172A',
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
     color: '#64748B',
-    textAlign: 'center',
-    marginBottom: 24,
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 20,
   },
-  inputGroup: {
+  card: {
+    padding: 16,
     marginBottom: 16,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     color: '#334155',
     marginBottom: 6,
+    marginTop: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
+    backgroundColor: '#F1F5F9',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    backgroundColor: '#FFFFFF',
     color: '#0F172A',
-  },
-  inputError: {
-    borderColor: '#EF4444',
-  },
-  errorText: {
-    color: '#EF4444',
-    fontSize: 12,
-    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 4,
   },
   forgotPasswordText: {
     color: '#2563EB',
     fontSize: 13,
     fontWeight: '500',
   },
-  primaryButton: {
-    marginTop: 8,
+  submitButton: {
+    backgroundColor: '#2563EB',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
   },
-  secondaryButton: {
-    marginTop: 12,
+  submitButtonDisabled: {
+    backgroundColor: '#94A3B8',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  backButton: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  linkBold: {
+    color: '#0F172A',
+    fontWeight: '600',
   },
 });

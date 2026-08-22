@@ -28,9 +28,12 @@ import type {
     CandidateRequest,
     CandidateResponse
 } from '../types/election.types';
+
+import { UserResponse } from '../types/user.types';
+
 import { ElectionFilter } from '../types/filters/ElectionFilter';
 
-const BASE_URL = 'http://10.0.2.2:3000/e-voting-rest-api/api/v1/';
+const BASE_URL = 'http://10.0.2.2:8080/e-voting-rest-api/api/v1/';
 
 async function getHeaders() {
     const token = await getAuthToken();
@@ -59,7 +62,7 @@ async function apiPatchCall<Req, Res>(route: string, data: Req): Promise<Res> {
 }
 
 export const loginUser = async (loginRequest: LoginRequest): Promise<LoginResponse> => {
-    const response = await apiPostCall<LoginRequest, LoginResponse>('/auth/login', loginRequest);
+    const response = await apiPostCall<LoginRequest, LoginResponse>('auth/login', loginRequest);
 
     if (response.token) {
         await setAuthToken(response.token);
@@ -69,6 +72,10 @@ export const loginUser = async (loginRequest: LoginRequest): Promise<LoginRespon
 
     return response;
 }
+
+export const getCurrentUser = (): Promise<UserResponse> => {
+  return apiGetCall<UserResponse>('users/me');
+};
 
 export const registerUser = (registerRequest: RegisterRequest) =>
     apiPostCall<RegisterRequest, MessageResponse>('auth/register', registerRequest);

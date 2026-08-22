@@ -1,4 +1,3 @@
-// src/screens/auth/ResetPasswordScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -7,73 +6,103 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Toast from 'react-native-toast-message';
 
 import Card from '../../components/Card';
 import { resetPassword } from '../../api/api';
 import { ResetPasswordRequest } from '../../types/auth.types';
+import { AuthStackParamList } from '../../navigation/RootNavigator';
+
+type ResetPasswordNavProp = NativeStackNavigationProp<AuthStackParamList, 'ResetPassword'>;
 
 export default function ResetPasswordScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<ResetPasswordNavProp>();
 
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleResetPassword = async () => {
-    if (!code.trim() || !newPassword || !confirmPassword) {
-      setError('Sva polja su obavezna.');
-      return;
-    }
+    const trimmedCode = code.trim();
 
-    if (newPassword.length < 6) {
-      setError('Lozinka mora sadržavati najmanje 6 znakova.');
+    if (!trimmedCode || !newPassword || !confirmPassword) {
+      Toast.show({
+        type: 'error',
+        text1: 'All fields are required.',
+      });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('Lozinke se ne podudaraju.');
+      Toast.show({
+        type: 'error',
+        text1: 'New password and confirmation password do not match!',
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      Toast.show({
+        type: 'error',
+        text1: 'New password must be at least 8 characters long.',
+      });
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setError(null);
 
       const requestPayload: ResetPasswordRequest = {
-        code: code.trim(),
+        code: trimmedCode,
         newPassword,
         confirmPassword,
       };
 
       const response = await resetPassword(requestPayload);
 
-      Alert.alert(
-        'Lozinka uspješno promijenjena',
-        response?.message || 'Sada se možete prijaviti s novom lozinkom.',
-        [
-          {
-            text: 'Idi na prijavu',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ]
-      );
+      Toast.show({
+        type: 'success',
+        text1: response?.message || 'Password updated successfully! Please log in.',
+      });
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+
+      console.log(navigation);
+
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        'Neispravan kod ili je istekao rok valjanosti. Pokušajte ponovno.';
-      setError(msg);
+      const apiError = err?.response?.data;
+
+      const errorMessage =
+        typeof apiError === 'string'
+          ? apiError
+          : apiError?.message ||
+            'Invalid or expired verification code. Please request a new one.';
+
+      Toast.show({
+        type: 'error',
+        text1: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.navigate('Login');
     }
   };
 
@@ -88,58 +117,43 @@ export default function ResetPasswordScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Postavljanje nove lozinke</Text>
+            <Text style={styles.title}>Reset Password</Text>
             <Text style={styles.subtitle}>
-              Unesite kod iz e-maila te potvrdite novu lozinku za svoj račun.
+              Enter the recovery code sent to your e-mail and confirm your new password.
             </Text>
           </View>
 
-          {error && (
-            <View style={styles.errorCard}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          )}
-
           <Card style={styles.card}>
-            <Text style={styles.label}>Kod za oporavak *</Text>
+            <Text style={styles.label}>Recovery Code *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Unesite kod iz e-maila"
+              placeholder="Enter recovery code"
               placeholderTextColor="#94A3B8"
               value={code}
-              onChangeText={(text) => {
-                setCode(text);
-                if (error) setError(null);
-              }}
+              onChangeText={setCode}
               autoCapitalize="none"
               autoCorrect={false}
               editable={!isSubmitting}
             />
 
-            <Text style={styles.label}>Nova lozinka *</Text>
+            <Text style={styles.label}>New Password *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Minimalno 6 znakova"
+              placeholder="Minimum 8 characters"
               placeholderTextColor="#94A3B8"
               value={newPassword}
-              onChangeText={(text) => {
-                setNewPassword(text);
-                if (error) setError(null);
-              }}
+              onChangeText={setNewPassword}
               secureTextEntry
               editable={!isSubmitting}
             />
 
-            <Text style={styles.label}>Potvrda nove lozinke *</Text>
+            <Text style={styles.label}>Confirm New Password *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ponovno unesite novu lozinku"
+              placeholder="Re-enter new password"
               placeholderTextColor="#94A3B8"
               value={confirmPassword}
-              onChangeText={(text) => {
-                setConfirmPassword(text);
-                if (error) setError(null);
-              }}
+              onChangeText={setConfirmPassword}
               secureTextEntry
               editable={!isSubmitting}
             />
@@ -156,17 +170,17 @@ export default function ResetPasswordScreen() {
               {isSubmitting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.submitButtonText}>Spremi novu lozinku</Text>
+                <Text style={styles.submitButtonText}>Save New Password</Text>
               )}
             </TouchableOpacity>
           </Card>
 
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.navigate('Login')}
+            onPress={handleCancel}
             activeOpacity={0.7}
           >
-            <Text style={styles.backButtonText}>Odustani i vrati se na prijavu</Text>
+            <Text style={styles.backButtonText}>Cancel and return to login</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -232,19 +246,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  errorCard: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-    marginBottom: 16,
-    padding: 12,
-    borderRadius: 8,
-  },
-  errorText: {
-    color: '#991B1B',
-    fontSize: 13,
-    textAlign: 'center',
   },
   backButton: {
     paddingVertical: 12,

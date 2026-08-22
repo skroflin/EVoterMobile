@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
 
 import Card from '../../components/Card';
 import StatusBadge from '../../components/StatusBadge';
@@ -18,14 +20,12 @@ import { getAllElections } from '../../api/api';
 import { ElectionResponse } from '../../types/election.types';
 import { ElectionFilter } from '../../types/filters/ElectionFilter';
 import { MainStackParamList } from '../../navigation/RootNavigator';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
 const INITIAL_FILTER: ElectionFilter = {
   title: '',
   candidateName: '',
-  status: undefined,
   startDate: '',
   endDate: '',
 };
@@ -53,9 +53,13 @@ export default function ElectionListScreen() {
       const response = await getAllElections(filter, 0, 20, 'createdAt,desc');
       setElections(response.content || []);
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || 'Greška pri dohvaćanju popisa izbora.'
-      );
+      const msg =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === 'string' ? err.response.data : null) ||
+        'Greška pri dohvaćanju popisa izbora.';
+
+      (Toast as any).error(msg);
+      setError(msg);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -130,7 +134,8 @@ export default function ElectionListScreen() {
 
               <View style={styles.datesContainer}>
                 <Text style={styles.dateText}>
-                  Trajanje: {item.startDate} — {item.endDate}
+                  Trajanje: {item.startTime ? item.startTime.split('T')[0] : '—'} —{' '}
+                  {item.endTime ? item.endTime.split('T')[0] : '—'}
                 </Text>
               </View>
 

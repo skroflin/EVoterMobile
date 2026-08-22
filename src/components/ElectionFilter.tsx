@@ -5,15 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   Platform,
 } from "react-native";
-
 import DateTimePicker, {
   DateTimePickerChangeEvent,
 } from "@react-native-community/datetimepicker";
 import { ElectionFilter as FilterType } from "../types/filters/ElectionFilter";
-import { ElectionStatus } from "../types/election.types";
 
 interface Props {
   filter: FilterType;
@@ -24,13 +21,6 @@ interface Props {
 export default function ElectionFilter({ filter, onChange, onReset }: Props) {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-
-  const statuses = [
-    { label: "Undefined", value: undefined },
-    { label: "Preparation", value: ElectionStatus.PREPARATION },
-    { label: "Active", value: ElectionStatus.ACTIVE },
-    { label: "Closed", value: ElectionStatus.CLOSED },
-  ];
 
   const handleFieldChange = (field: keyof FilterType, value: any) => {
     onChange({
@@ -63,10 +53,9 @@ export default function ElectionFilter({ filter, onChange, onReset }: Props) {
     }
   };
 
-  const hasActiveFilers =
+  const hasActiveFilters =
     Boolean(filter.title) ||
     Boolean(filter.candidateName) ||
-    Boolean(filter.status) ||
     Boolean(filter.startDate) ||
     Boolean(filter.endDate);
 
@@ -96,35 +85,6 @@ export default function ElectionFilter({ filter, onChange, onReset }: Props) {
           onChangeText={(text) => handleFieldChange("candidateName", text)}
           clearButtonMode="while-editing"
         />
-      </View>
-
-      <View style={styles.fieldGroup}>
-        <Text style={styles.label}>Election status</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.statusRow}
-        >
-          {statuses.map((item) => {
-            const isSelected = filter.status === item.value;
-            return (
-              <TouchableOpacity
-                key={item.label}
-                style={[styles.chip, isSelected && styles.selectedChip]}
-                onPress={() => handleFieldChange("status", item.value)}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    isSelected && styles.selectedChipText,
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
       </View>
 
       <View style={styles.dateRow}>
@@ -183,7 +143,7 @@ export default function ElectionFilter({ filter, onChange, onReset }: Props) {
         </View>
       </View>
 
-      {hasActiveFilers && (
+      {hasActiveFilters && (
         <TouchableOpacity style={styles.resetButton} onPress={onReset}>
           <Text style={styles.resetText}>Clear filters</Text>
         </TouchableOpacity>
@@ -230,31 +190,6 @@ const styles = StyleSheet.create({
     borderColor: "#CBD5E1",
     fontSize: 14,
     color: "#0F172A",
-  },
-  statusRow: {
-    flexDirection: "row",
-    gap: 8,
-    paddingVertical: 2,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "#F1F5F9",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  selectedChip: {
-    backgroundColor: "#1E90FF",
-    borderColor: "#1E90FF",
-  },
-  chipText: {
-    fontSize: 13,
-    color: "#475569",
-  },
-  selectedChipText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
   },
   dateRow: {
     flexDirection: "row",

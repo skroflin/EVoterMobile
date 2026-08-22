@@ -4,35 +4,45 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message';
+
 import VerificationCodeCard from '../../components/VerificationCodeCard';
 import { verifyUser } from '../../api/api';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthStackParamList } from '../../navigation/RootNavigator';
 
-interface VerificationScreenProps {
-  email: string;
-  onVerificationSuccess?: () => void;
-}
+type Props = NativeStackScreenProps<AuthStackParamList, 'Verification'>;
 
-export default function VerificationScreen({
-  email,
-  onVerificationSuccess,
-}: VerificationScreenProps) {
+export default function VerificationScreen({ route, navigation }: Props) {
+  const email = route.params?.email || '';
   const [loading, setLoading] = useState(false);
 
   const handleVerify = async (code: string) => {
+    if (!code || code.trim() === '') {
+      (Toast as any).error('Please enter the verification code.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const response = await verifyUser({ email, code });
-      Alert.alert('Uspjeh', response.message || 'Kod je uspješno verificiran!');
-      onVerificationSuccess?.();
+      (Toast as any).success(
+        response?.message || 'Account verified successfully!'
+      );
+      navigation.navigate('Login' as any);
     } catch (error: any) {
+      const apiError = error?.response?.data;
+      
       const errorMessage =
-        error?.response?.data?.message ||
-        'Neispravan verifikacijski kod ili greška pri komunikaciji sa serverom.';
-      Alert.alert('Greška', errorMessage);
+        typeof apiError === 'string'
+          ? apiError
+          : apiError?.message ||
+            'Invalid verification code or server communication error.';
+
+      (Toast as any).error(errorMessage);
     } finally {
       setLoading(false);
     }

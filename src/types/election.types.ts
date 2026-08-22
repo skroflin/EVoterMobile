@@ -19,8 +19,8 @@ export interface CandidateResponse {
 export interface ElectionRequest {
     title: string;
     description: string;
-    startDate: string;
-    endDate: string;
+    startTime: string;
+    endTime: string;
     candidates: CandidateRequest[];
 }
 
@@ -28,8 +28,8 @@ export interface ElectionResponse {
     id: string;
     title: string;
     description: string;
-    startDate: string;
-    endDate: string;
+    startTime: string;
+    endTime: string;
     candidates: CandidateResponse[];
     isActive?: boolean;
     status?: ElectionStatus

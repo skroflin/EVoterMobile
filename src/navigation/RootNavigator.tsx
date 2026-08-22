@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { IconOutline } from '@ant-design/icons-react-native';
@@ -19,12 +18,14 @@ import ElectionListScreen from '../screens/elections/ElectionListScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import VoteHistoryScreen from '../screens/votes/VoteHistoryScreen';
 import VoteScreen, { Election } from '../screens/votes/VoteScreen';
+import VerificationScreen from '../screens/auth/VerificationScreen';
 
 export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
     ForgotPassword: undefined;
     ResetPassword: { email?: string } | undefined;
+    Verification: { email?: string } | undefined;
 };
 
 export type VoterTabParamList = {
@@ -51,11 +52,12 @@ const AdminTab = createBottomTabNavigator<AdminTabParamList>();
 const MainStack = createNativeStackNavigator<MainStackParamList>();
 
 const AuthNavigator = () => (
-    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
         <AuthStack.Screen name="Login" component={LoginScreen} />
         <AuthStack.Screen name="Register" component={RegisterScreen} />
         <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         <AuthStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+        <AuthStack.Screen name="Verification" component={VerificationScreen} />
     </AuthStack.Navigator>
 );
 
@@ -142,31 +144,39 @@ const AdminTabNavigator = () => (
 );
 
 const MainAppNavigator = () => {
-    const role = useAuthStore((state) => state.role);
-    const isAdmin = role === 'ROLE_ELECTION_ADMIN';
+  const role = useAuthStore((state) => state.role);
+  const isAdmin = role ? role.toUpperCase().includes('ADMIN') : false;
 
-    return (
-        <MainStack.Navigator>
-            <MainStack.Screen
-                name="MainTabs"
-                component={isAdmin ? AdminTabNavigator : VoterTabNavigator}
-                options={{ headerShown: false }}
-            />
-            <MainStack.Screen
-                name="VoteScreen"
-                component={VoteScreen}
-                options={({ route }) => ({
-                    title: route.params.electionTitle || 'Voting',
-                    headerBackTitle: 'Back'
-                })}
-            />
-            <MainStack.Screen
-                name="ElectionDetails"
-                component={ElectionDetailsScreen}
-                options={{ title: 'Election Details' }}
-            />
-        </MainStack.Navigator>
-    );
+  return (
+    <MainStack.Navigator key={isAdmin ? 'admin-stack' : 'voter-stack'}>
+      {isAdmin ? (
+        <MainStack.Screen
+          name="MainTabs"
+          component={AdminTabNavigator}
+          options={{ headerShown: false }}
+        />
+      ) : (
+        <MainStack.Screen
+          name="MainTabs"
+          component={VoterTabNavigator}
+          options={{ headerShown: false }}
+        />
+      )}
+      <MainStack.Screen
+        name="VoteScreen"
+        component={VoteScreen}
+        options={({ route }) => ({
+          title: route.params.electionTitle || 'Voting',
+          headerBackTitle: 'Back',
+        })}
+      />
+      <MainStack.Screen
+        name="ElectionDetails"
+        component={ElectionDetailsScreen}
+        options={{ title: 'Election Details' }}
+      />
+    </MainStack.Navigator>
+  );
 };
 
 export const RootNavigator = () => {
@@ -188,9 +198,5 @@ export const RootNavigator = () => {
         );
     }
 
-    return (
-        <NavigationContainer>
-            {isAuthenticated ? <MainAppNavigator /> : <AuthNavigator />}
-        </NavigationContainer>
-    );
+    return isAuthenticated ? <MainAppNavigator /> : <AuthNavigator />;
 };

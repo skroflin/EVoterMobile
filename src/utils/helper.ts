@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Keychain from 'react-native-keychain';
+import Keychain from 'react-native-keychain';
 
 export async function setAuthToken(token: string): Promise<boolean> {
     try {
