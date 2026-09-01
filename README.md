@@ -1,5 +1,20 @@
 # EVoterMobile
 
+## Sadržaj
+
+- [Opis projekta](#opis-projekta)
+- [Preduvjeti](#preduvjeti)
+- [Instalacija Android emulatora](#instalacija-android-emulatora)
+- [Instalacija i pokretanje projekta](#instalacija-i-pokretanje-projekta)
+- [Ovisnosti projekta](#ovisnosti-projekta)
+- [Dostupne npm skripte](#dostupne-npm-skripte)
+- [Struktura projekta](#struktura-projekta)
+- [Otklanjanje poteškoća](#otklanjanje-poteškoća)
+- [Zahtjevi sustava](#zahtjevi-sustava)
+- [Kontakt i dokumentacija](#kontakt-i-dokumentacija)
+
+---
+
 ## Opis projekta
 
 **EVoterMobile** je mobilna aplikacija razvijena u tehnologiji **React Native** koja omogućuje sigurno i fleksibilno elektroničko glasovanje. Aplikacija je razvijena s ciljem poboljšanja dostupnosti, jednostavnosti i korisničkog iskustva pri korištenju sustava za elektroničko glasovanje na mobilnim uređajima.
