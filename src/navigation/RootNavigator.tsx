@@ -82,7 +82,7 @@ const VoterTabNavigator = () => (
             name="ElectionListTab"
             component={ElectionListScreen}
             options={{
-                title: 'Election List',
+                title: 'Popis izbora',
                 tabBarIcon: ({ color, size }) => <List size={size} color={color} />,
             }}
         />
@@ -90,7 +90,7 @@ const VoterTabNavigator = () => (
             name="MyVotesTab"
             component={VoteHistoryScreen}
             options={{
-                title: 'My Votes',
+                title: 'Moji glasovi',
                 tabBarIcon: ({ color, size }) => <CheckSquare size={size} color={color} />,
             }}
         />
@@ -109,7 +109,7 @@ const AdminTabNavigator = () => (
             name="ProfileTab"
             component={ProfileScreen}
             options={{
-                title: 'Profile',
+                title: 'Profil',
                 tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
             }}
         />
@@ -117,7 +117,7 @@ const AdminTabNavigator = () => (
             name="ElectionListTab"
             component={ElectionListScreen}
             options={{
-                title: 'Election List',
+                title: 'Popis izbora',
                 tabBarIcon: ({ color, size }) => <List size={size} color={color} />,
             }}
         />
@@ -125,7 +125,7 @@ const AdminTabNavigator = () => (
             name="AddElectionTab"
             component={CreateElectionScreen}
             options={{
-                title: 'Add Election',
+                title: 'Kreiraj izbor',
                 tabBarIcon: ({ color, size }) => <PlusCircle size={size} color={color} />,
             }}
         />
@@ -162,7 +162,7 @@ const MainAppNavigator = () => {
             <MainStack.Screen
                 name="ElectionDetails"
                 component={ElectionDetailsScreen}
-                options={{ title: 'Election Details' }}
+                options={{ title: 'Detalji izbora' }}
             />
         </MainStack.Navigator>
     );

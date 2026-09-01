@@ -19,8 +19,8 @@ export interface CandidateResponse {
 export interface ElectionRequest {
     title: string;
     description: string;
-    startTime: string;
-    endTime: string;
+    startDate: string;
+    endDate: string;
     candidates: CandidateRequest[];
 }
 

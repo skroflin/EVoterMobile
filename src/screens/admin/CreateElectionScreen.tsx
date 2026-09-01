@@ -64,7 +64,7 @@ export default function CreateElectionScreen() {
       if (selectedDate <= startDate) {
         Toast.show({
           type: 'error',
-          text1: 'Election end date must be after the start date.',
+          text1: 'Datum završetka izbora mora biti nakon datuma početka.',
         });
         setShowPicker(null);
         return;
@@ -93,7 +93,7 @@ export default function CreateElectionScreen() {
     if (candidates.length <= 2) {
       Toast.show({
         type: 'error',
-        text1: 'Elections must have at least 2 candidates.',
+        text1: 'Izbori moraju imati najmanje 2 kandidata.',
       });
       return;
     }
@@ -105,34 +105,34 @@ export default function CreateElectionScreen() {
     const trimmedDescription = description.trim();
 
     if (!trimmedTitle) {
-      return 'Election title is required.';
+      return 'Naslov izbora je obvezan.';
     }
     if (trimmedTitle.length < 100 || trimmedTitle.length > 500) {
-      return `Election title must be between 100 and 500 characters (currently: ${trimmedTitle.length}).`;
+      return `Naslov izbora mora sadržavati između 100 i 500 znakova (trenutno: ${trimmedTitle.length}).`;
     }
 
     if (!trimmedDescription) {
-      return 'Election description is required.';
+      return 'Opis izbora je obvezan.';
     }
     if (trimmedDescription.length < 500 || trimmedDescription.length > 2000) {
-      return `Election description must be between 500 and 2000 characters (currently: ${trimmedDescription.length}).`;
+      return `Opis izbora mora sadržavati između 500 i 2000 znakova (trenutno: ${trimmedDescription.length}).`;
     }
 
     if (startDate <= new Date()) {
-      return 'Election start time must be in the future.';
+      return 'Vrijeme početka izbora mora biti u budućnosti.';
     }
 
     if (endDate <= startDate) {
-      return 'Election end date must be after the start date.';
+      return 'Datum završetka izbora mora biti nakon datuma početka.';
     }
 
     const durationInMinutes = (endDate.getTime() - startDate.getTime()) / (1000 * 60);
     if (durationInMinutes < 240) {
-      return 'Election must be at least 4 hours.';
+      return 'Izbori moraju trajati najmanje 4 sata.';
     }
 
     if (candidates.length < 2) {
-      return 'Names for at least 2 candidates must be provided.';
+      return 'Moraju biti navedena imena za najmanje 2 kandidata.';
     }
 
     for (let i = 0; i < candidates.length; i++) {
@@ -140,17 +140,17 @@ export default function CreateElectionScreen() {
       const bio = candidates[i].description.trim();
 
       if (!name) {
-        return `Candidate #${i + 1} name is required.`;
+        return `Ime kandidata #${i + 1} je obvezno.`;
       }
       if (name.length < 2 || name.length > 50) {
-        return `Candidate #${i + 1} name must be between 2 and 50 characters.`;
+        return `Ime kandidata #${i + 1} mora sadržavati između 2 i 50 znakova.`;
       }
 
       if (!bio) {
-        return `Candidate #${i + 1} biography is required.`;
+        return `Biografija kandidata #${i + 1} je obvezna.`;
       }
       if (bio.length > 500) {
-        return `Candidate #${i + 1} biography cannot exceed 500 characters.`;
+        return `Biografija kandidata #${i + 1} ne smije premašiti 500 znakova.`;
       }
     }
 
@@ -175,8 +175,8 @@ export default function CreateElectionScreen() {
       const requestPayload: ElectionRequest = {
         title: title.trim(),
         description: description.trim(),
-        startTime: startDate.toISOString(),
-        endTime: endDate.toISOString(),
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         candidates: candidates.map((c) => ({
           name: c.name.trim(),
           bio: c.description.trim(),
@@ -187,7 +187,7 @@ export default function CreateElectionScreen() {
 
       Toast.show({
         type: 'success',
-        text1: 'New election successfully created!',
+        text1: 'Novi izbori uspješno stvoreni!',
       });
       navigation.navigate('ElectionListTab');
     } catch (err: any) {
@@ -195,7 +195,7 @@ export default function CreateElectionScreen() {
       const msg =
         typeof apiError === 'string'
           ? apiError
-          : apiError?.message || 'An error occurred while creating the election.';
+          : apiError?.message || 'Došlo je do pogreške prilikom stvaranja izbora.';
 
       setError(msg);
       Toast.show({
@@ -208,7 +208,7 @@ export default function CreateElectionScreen() {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleString('en-US', {
+    return date.toLocaleString('hr-HR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -224,7 +224,7 @@ export default function CreateElectionScreen() {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-          <Text style={styles.screenTitle}>Create New Election</Text>
+          <Text style={styles.screenTitle}>Stvori nove izbore</Text>
 
           {error && (
             <View style={styles.errorCard}>
@@ -233,15 +233,15 @@ export default function CreateElectionScreen() {
           )}
 
           <Card style={styles.card}>
-            <Text style={styles.sectionHeader}>Basic Information</Text>
+            <Text style={styles.sectionHeader}>Osnovne informacije</Text>
 
             <View style={styles.labelRow}>
-              <Text style={styles.label}>Election Title *</Text>
+              <Text style={styles.label}>Naslov izbora *</Text>
               <Text style={styles.charCount}>{title.trim().length}/500 (min 100)</Text>
             </View>
             <TextInput
               style={styles.input}
-              placeholder="Enter election title (at least 100 characters)..."
+              placeholder="Unesite naslov izbora (najmanje 100 znakova)..."
               placeholderTextColor="#94A3B8"
               value={title}
               onChangeText={setTitle}
@@ -249,12 +249,12 @@ export default function CreateElectionScreen() {
             />
 
             <View style={styles.labelRow}>
-              <Text style={styles.label}>Election Description *</Text>
+              <Text style={styles.label}>Opis izbora *</Text>
               <Text style={styles.charCount}>{description.trim().length}/2000 (min 500)</Text>
             </View>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Detailed description and election rules (at least 500 characters)..."
+              placeholder="Detaljan opis i pravila izbornog procesa (najmanje 500 znakova)..."
               placeholderTextColor="#94A3B8"
               value={description}
               onChangeText={setDescription}
@@ -265,9 +265,9 @@ export default function CreateElectionScreen() {
           </Card>
 
           <Card style={styles.card}>
-            <Text style={styles.sectionHeader}>Duration</Text>
+            <Text style={styles.sectionHeader}>Trajanje izbora</Text>
 
-            <Text style={styles.label}>Election Start</Text>
+            <Text style={styles.label}>Početak izbora</Text>
             <View style={styles.datePickerRow}>
               <TouchableOpacity
                 style={styles.dateButton}
@@ -284,7 +284,7 @@ export default function CreateElectionScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={[styles.label, { marginTop: 12 }]}>Election End</Text>
+            <Text style={[styles.label, { marginTop: 12 }]}>Završetak izbora</Text>
             <View style={styles.datePickerRow}>
               <TouchableOpacity
                 style={styles.dateButton}
@@ -316,17 +316,17 @@ export default function CreateElectionScreen() {
                 style={styles.closePickerButton}
                 onPress={() => setShowPicker(null)}
               >
-                <Text style={styles.closePickerText}>Confirm Selection</Text>
+                <Text style={styles.closePickerText}>Potvrdi odabir</Text>
               </TouchableOpacity>
             )}
           </Card>
 
           <Card style={styles.card}>
             <View style={styles.candidateHeaderRow}>
-              <Text style={styles.sectionHeader}>Candidates ({candidates.length})</Text>
+              <Text style={styles.sectionHeader}>Kandidati ({candidates.length})</Text>
               <TouchableOpacity style={styles.addCandidateButton} onPress={addCandidate}>
                 <Plus size={16} color="#2563EB" />
-                <Text style={styles.addCandidateText}>Add</Text>
+                <Text style={styles.addCandidateText}>Dodaj</Text>
               </TouchableOpacity>
             </View>
 
@@ -342,12 +342,12 @@ export default function CreateElectionScreen() {
                 </View>
 
                 <View style={styles.labelRow}>
-                  <Text style={styles.label}>Full Name *</Text>
+                  <Text style={styles.label}>Ime i prezime *</Text>
                   <Text style={styles.charCount}>{candidate.name.trim().length}/50</Text>
                 </View>
                 <TextInput
                   style={styles.input}
-                  placeholder="Candidate full name (2 - 50 characters) *"
+                  placeholder="Ime i prezime kandidata (2 - 50 znakova) *"
                   placeholderTextColor="#94A3B8"
                   value={candidate.name}
                   onChangeText={(val) => handleCandidateChange(index, 'name', val)}
@@ -355,12 +355,12 @@ export default function CreateElectionScreen() {
                 />
 
                 <View style={styles.labelRow}>
-                  <Text style={styles.label}>Biography *</Text>
+                  <Text style={styles.label}>Biografija *</Text>
                   <Text style={styles.charCount}>{candidate.description.trim().length}/500</Text>
                 </View>
                 <TextInput
                   style={[styles.input, styles.textAreaCandidate]}
-                  placeholder="Short candidate biography (up to 500 characters) *"
+                  placeholder="Kratka biografija kandidata (do 500 znakova) *"
                   placeholderTextColor="#94A3B8"
                   value={candidate.description}
                   onChangeText={(val) => handleCandidateChange(index, 'description', val)}
@@ -380,7 +380,7 @@ export default function CreateElectionScreen() {
             {isSubmitting ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.submitButtonText}>Create Election</Text>
+              <Text style={styles.submitButtonText}>Stvori izbore</Text>
             )}
           </TouchableOpacity>
         </ScrollView>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
@@ -30,45 +30,94 @@ const INITIAL_FILTER: ElectionFilter = {
   endDate: '',
 };
 
+const PAGE_SIZE = 20;
+
 export default function ElectionListScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   const [elections, setElections] = useState<ElectionResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [page, setPage] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(true);
 
   const [filter, setFilter] = useState<ElectionFilter>(INITIAL_FILTER);
   const [showFilter, setShowFilter] = useState<boolean>(false);
 
-  const fetchElections = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '—';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '—';
+
+    return date.toLocaleDateString('hr-HR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
+  const fetchInitialElections = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
+
+      try {
+        const response = await getAllElections(filter, 0, PAGE_SIZE, 'createdAt,desc');
+        const content = response.content || [];
+
+        setElections(content);
+        setPage(0);
+        setHasMore(!response.last && content.length === PAGE_SIZE);
+      } catch (err: any) {
+        const msg =
+          err?.response?.data?.message ||
+          (typeof err?.response?.data === 'string' ? err.response.data : null) ||
+          'Greška pri dohvaćanju popisa izbora.';
+
+        (Toast as any).show({
+          type: 'error',
+          text1: msg,
+        });
+        setError(msg);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [filter]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchInitialElections();
+    }, [fetchInitialElections])
+  );
+
+  const handleLoadMore = async () => {
+    if (loadingMore || !hasMore || loading || refreshing) return;
 
     try {
-      const response = await getAllElections(filter, 0, 20, 'createdAt,desc');
-      setElections(response.content || []);
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      const response = await getAllElections(filter, nextPage, PAGE_SIZE, 'createdAt,desc');
+      const newContent = response.content || [];
+
+      setElections((prev) => [...prev, ...newContent]);
+      setPage(nextPage);
+      setHasMore(!response.last && newContent.length === PAGE_SIZE);
     } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        (typeof err?.response?.data === 'string' ? err.response.data : null) ||
-        'Greška pri dohvaćanju popisa izbora.';
-
-      (Toast as any).error(msg);
-      setError(msg);
+      console.error('Greška pri učitavanju dodatnih izbora:', err);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoadingMore(false);
     }
-  }, [filter]);
-
-  useEffect(() => {
-    fetchElections();
-  }, [fetchElections]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -103,7 +152,7 @@ export default function ElectionListScreen() {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => fetchElections()}
+            onPress={() => fetchInitialElections()}
           >
             <Text style={styles.retryText}>Pokušaj ponovno</Text>
           </TouchableOpacity>
@@ -111,14 +160,23 @@ export default function ElectionListScreen() {
       ) : (
         <FlatList
           data={elections}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => fetchElections(true)}
+              onRefresh={() => fetchInitialElections(true)}
               colors={['#2563EB']}
             />
+          }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={styles.footerLoader}>
+                <ActivityIndicator size="small" color="#2563EB" />
+              </View>
+            ) : null
           }
           renderItem={({ item }) => (
             <Card
@@ -134,8 +192,7 @@ export default function ElectionListScreen() {
 
               <View style={styles.datesContainer}>
                 <Text style={styles.dateText}>
-                  Trajanje: {item.startTime ? item.startTime.split('T')[0] : '—'} —{' '}
-                  {item.endTime ? item.endTime.split('T')[0] : '—'}
+                  Trajanje: {formatDate(item.startTime)} — {formatDate(item.endTime)}
                 </Text>
               </View>
 
@@ -215,4 +272,5 @@ const styles = StyleSheet.create({
   retryText: { color: '#FFFFFF', fontWeight: '600', fontSize: 14 },
   emptyContainer: { padding: 32, alignItems: 'center' },
   emptyText: { fontSize: 14, color: '#94A3B8' },
+  footerLoader: { paddingVertical: 16, alignItems: 'center' },
 });

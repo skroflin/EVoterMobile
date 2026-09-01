@@ -11,6 +11,9 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 import Card from '../../components/Card';
 import StatusBadge from '../../components/StatusBadge';
 import CandidateCard from '../../components/CandidateCard';
@@ -32,7 +35,6 @@ const STATUS_TO_INT: Record<string, number> = {
 export default function ElectionDetailsScreen({ route, navigation }: Props) {
   const { electionId } = route.params;
 
-  // Provjera uloge putem Zustand store-a
   const role = useAuthStore((state) => state.role);
   const isAdmin = role ? role.toUpperCase().includes('ADMIN') : false;
 
@@ -41,9 +43,11 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  useEffect(() => {
-    fetchElectionDetails();
-  }, [electionId]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchElectionDetails();
+    }, [electionId])
+  );
 
   const fetchElectionDetails = async () => {
     try {
@@ -77,7 +81,16 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
         electionStatus: statusValue,
       } as any);
 
-      setElection(updatedElection);
+      setElection((prev) =>
+        prev
+          ? {
+            ...prev,
+            ...updatedElection,
+            candidates: updatedElection?.candidates ?? prev.candidates,
+          }
+          : updatedElection
+      );
+
       (Toast as any).show({
         type: 'success',
         text1: 'Status izbora uspješno ažuriran!',
@@ -91,6 +104,20 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
       (Toast as any).show({ type: 'error', text1: msg });
       throw err;
     }
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '—';
+
+    return date.toLocaleString('hr-HR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   if (loading) {
@@ -116,12 +143,10 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
 
   const isActive =
     election.status === ElectionStatus.ACTIVE ||
+    (election.status as any) === 1 ||
     election.status?.toString().toUpperCase() === 'ACTIVE';
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '—';
-    return dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
-  };
+  const hasVoted = Boolean((election as any).hasVoted || (election as any).userVoted);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -141,6 +166,10 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
           </View>
 
           <Text style={styles.title}>{election.title}</Text>
+
+          {election.description ? (
+            <Text style={styles.description}>{election.description}</Text>
+          ) : null}
 
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Početak:</Text>
@@ -171,7 +200,8 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
             <Button
               title="Pristupi glasanju"
               onPress={() =>
-                navigation.navigate('VoteScreen', {
+                navigation.navigate('VoteScreen' as any, {
+                  election,
                   electionId: election.id,
                   electionTitle: election.title,
                 })
@@ -181,7 +211,7 @@ export default function ElectionDetailsScreen({ route, navigation }: Props) {
           ) : (
             <View style={styles.disabledVoteNotice}>
               <Text style={styles.disabledVoteText}>
-                {election.status === ElectionStatus.PREPARATION
+                {election.status === ElectionStatus.PREPARATION || (election.status as any) === 0
                   ? 'Izbori su u fazi pripreme. Glasanje još nije otvoreno.'
                   : 'Izbori su završeni. Glasanje više nije moguće.'}
               </Text>
@@ -236,6 +266,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#0F172A',
+    marginBottom: 8,
+  },
+  description: {
+    fontSize: 14,
+    color: '#475569',
+    lineHeight: 20,
     marginBottom: 16,
   },
   infoRow: {
@@ -266,6 +302,38 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '500',
     textAlign: 'center',
+  },
+  votedNoticeBox: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    alignItems: 'center',
+  },
+  votedNoticeTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#166534',
+    marginBottom: 4,
+  },
+  votedNoticeSub: {
+    fontSize: 13,
+    color: '#15803D',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  receiptButton: {
+    backgroundColor: '#16A34A',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  receiptButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   emptyText: { fontSize: 14, color: '#94A3B8', textAlign: 'center' },
   errorText: {
