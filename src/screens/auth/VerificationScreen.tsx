@@ -21,7 +21,7 @@ export default function VerificationScreen({ route, navigation }: Props) {
 
   const handleVerify = async (code: string) => {
     if (!code || code.trim() === '') {
-      (Toast as any).error('Please enter the verification code.');
+      (Toast as any).error('Unesite kod za verifikaciju.');
       return;
     }
 
@@ -30,7 +30,7 @@ export default function VerificationScreen({ route, navigation }: Props) {
     try {
       const response = await verifyUser({ email, code });
       (Toast as any).success(
-        response?.message || 'Account verified successfully!'
+        response?.message || 'Račun uspješno verificiran!'
       );
       navigation.navigate('Login' as any);
     } catch (error: any) {
@@ -40,7 +40,7 @@ export default function VerificationScreen({ route, navigation }: Props) {
         typeof apiError === 'string'
           ? apiError
           : apiError?.message ||
-            'Invalid verification code or server communication error.';
+            'Netočan kod za verifikaciju ili greška na strani servera.';
 
       (Toast as any).error(errorMessage);
     } finally {

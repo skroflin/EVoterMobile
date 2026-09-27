@@ -36,7 +36,7 @@ export default function LoginScreen() {
     if (!trimmedUsername || !password) {
       Toast.show({
         type: 'error',
-        text1: 'Username and password are required.',
+        text1: 'Korisničko ime i lozinka su obavezni.',
       });
       return;
     }
@@ -51,7 +51,7 @@ export default function LoginScreen() {
 
       Toast.show({
         type: 'success',
-        text1: 'Successfully logged in!',
+        text1: 'Prijava uspješna!',
       });
 
       await initializeAuth();
@@ -61,7 +61,7 @@ export default function LoginScreen() {
       const errorMessage =
         typeof apiError === 'string'
           ? apiError
-          : apiError?.message || 'Invalid username or password. Please try again.';
+          : apiError?.message || 'Netočno korisničko ime ili lozinka. Pokušajte ponovno!';
 
       Toast.show({
         type: 'error',
@@ -83,17 +83,17 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.title}>Dobrodošli nazad!</Text>
             <Text style={styles.subtitle}>
-              Sign in to your account to continue.
+              Prijavite se
             </Text>
           </View>
 
           <Card style={styles.card}>
-            <Text style={styles.label}>Username *</Text>
+            <Text style={styles.label}>Korisničko ime *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your username"
+              placeholder="Unesite korisničko ime"
               placeholderTextColor="#94A3B8"
               value={username}
               onChangeText={setUsername}
@@ -105,7 +105,7 @@ export default function LoginScreen() {
             <Text style={styles.label}>Password *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter your password"
+              placeholder="Unesite lozinku"
               placeholderTextColor="#94A3B8"
               value={password}
               onChangeText={setPassword}
@@ -117,7 +117,7 @@ export default function LoginScreen() {
               style={styles.forgotPasswordContainer}
               onPress={() => navigation.navigate('ForgotPassword')}
             >
-              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+              <Text style={styles.forgotPasswordText}>Zaboravili lozinku?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -132,7 +132,7 @@ export default function LoginScreen() {
               {isSubmitting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.submitButtonText}>Log In</Text>
+                <Text style={styles.submitButtonText}>Prijava</Text>
               )}
             </TouchableOpacity>
           </Card>
@@ -143,7 +143,7 @@ export default function LoginScreen() {
             activeOpacity={0.7}
           >
             <Text style={styles.backButtonText}>
-              Don't have an account? <Text style={styles.linkBold}>Sign up</Text>
+              Nemate račun? <Text style={styles.linkBold}>Registrirajte se</Text>
             </Text>
           </TouchableOpacity>
         </ScrollView>

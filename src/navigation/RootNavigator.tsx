@@ -74,7 +74,7 @@ const VoterTabNavigator = () => (
             name="ProfileTab"
             component={ProfileScreen}
             options={{
-                title: 'Profile',
+                title: 'Profil',
                 tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
             }}
         />

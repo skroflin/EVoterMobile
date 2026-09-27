@@ -42,7 +42,6 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.screenTitle}>Profile</Text>
 
         <Text style={styles.sectionTitle}>Moj profil</Text>
 
@@ -76,10 +75,12 @@ export default function ProfileScreen() {
             <Text style={[styles.infoValue, styles.activeText]}>Aktivan</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Status tokena za glasanje</Text>
-            <Text style={styles.infoValue}>Nije zatražen</Text>
-          </View>
+          {role?.toUpperCase() !== 'ADMIN' && role?.toUpperCase() !== 'ROLE_ADMIN' && (
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Status tokena za glasanje</Text>
+              <Text style={styles.infoValue}>Nije zatražen</Text>
+            </View>
+          )}
         </Card>
 
         <TouchableOpacity
@@ -107,12 +108,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
     paddingBottom: 32,
-  },
-  screenTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginVertical: 16,
   },
   sectionTitle: {
     fontSize: 22,

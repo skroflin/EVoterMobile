@@ -56,7 +56,7 @@ export default function RegisterScreen({ navigation }: Props) {
 
       Toast.show({
         type: 'success',
-        text1: 'Registration successful! Please verify your email.',
+        text1: 'Registracija uspješna! Molim Vas verificirajte email.',
       });
 
       navigation.navigate('Verification' as any, { email: data.email.trim() });
@@ -65,7 +65,7 @@ export default function RegisterScreen({ navigation }: Props) {
       const message =
         typeof apiError === 'string'
           ? apiError
-          : apiError?.message || 'An error occurred during registration.';
+          : apiError?.message || 'Greška se dogodila tijekom registracije.';
 
       Toast.show({
         type: 'error',
@@ -88,14 +88,14 @@ export default function RegisterScreen({ navigation }: Props) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.title}>Kreirajte račun</Text>
             <Text style={styles.subtitle}>
-              Create an account for e-Voting system.
+              Kreirajte račun za sustav za e-glasanje.
             </Text>
           </View>
 
           <Card style={styles.card}>
-            <Text style={styles.label}>First Name *</Text>
+            <Text style={styles.label}>Ime *</Text>
             <Controller
               control={control}
               name="firstName"
@@ -105,7 +105,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  placeholder="Enter your first name"
+                  placeholder="Unesite Vaše ime"
                   placeholderTextColor="#94A3B8"
                   maxLength={50}
                   editable={!isSubmitting}
@@ -116,7 +116,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <Text style={styles.errorText}>{errors.firstName.message}</Text>
             )}
 
-            <Text style={styles.label}>Last Name *</Text>
+            <Text style={styles.label}>Prezime *</Text>
             <Controller
               control={control}
               name="lastName"
@@ -126,7 +126,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
-                  placeholder="Enter your last name"
+                  placeholder="Unesite Vaše prezime"
                   placeholderTextColor="#94A3B8"
                   maxLength={50}
                   editable={!isSubmitting}
@@ -137,7 +137,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <Text style={styles.errorText}>{errors.lastName.message}</Text>
             )}
 
-            <Text style={styles.label}>Username *</Text>
+            <Text style={styles.label}>Korisničko ime *</Text>
             <Controller
               control={control}
               name="username"
@@ -149,7 +149,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   value={value}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  placeholder="Enter your username"
+                  placeholder="Unesite Vaše korisničko ime"
                   placeholderTextColor="#94A3B8"
                   maxLength={50}
                   editable={!isSubmitting}
@@ -160,7 +160,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <Text style={styles.errorText}>{errors.username.message}</Text>
             )}
 
-            <Text style={styles.label}>E-mail Address *</Text>
+            <Text style={styles.label}>E-mail adresa *</Text>
             <Controller
               control={control}
               name="email"
@@ -184,7 +184,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <Text style={styles.errorText}>{errors.email.message}</Text>
             )}
 
-            <Text style={styles.label}>Password *</Text>
+            <Text style={styles.label}>Lozinka *</Text>
             <Controller
               control={control}
               name="password"
@@ -195,7 +195,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={onChange}
                   value={value}
                   secureTextEntry
-                  placeholder="Minimum 8, maximum 100 characters"
+                  placeholder="Minimalno 8, maksimalno 100 znakova"
                   placeholderTextColor="#94A3B8"
                   maxLength={100}
                   editable={!isSubmitting}
@@ -206,7 +206,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <Text style={styles.errorText}>{errors.password.message}</Text>
             )}
 
-            <Text style={styles.label}>Confirm Password *</Text>
+            <Text style={styles.label}>Potvrda lozinke *</Text>
             <Controller
               control={control}
               name="confirmPassword"
@@ -220,7 +220,7 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={onChange}
                   value={value}
                   secureTextEntry
-                  placeholder="Re-enter your password"
+                  placeholder="Ponovno unesite lozinku"
                   placeholderTextColor="#94A3B8"
                   maxLength={100}
                   editable={!isSubmitting}
@@ -256,7 +256,7 @@ export default function RegisterScreen({ navigation }: Props) {
             activeOpacity={0.7}
           >
             <Text style={styles.backButtonText}>
-              Already have an account? <Text style={styles.linkBold}>Log in</Text>
+              Već imate račun? <Text style={styles.linkBold}>Prijava</Text>
             </Text>
           </TouchableOpacity>
         </ScrollView>

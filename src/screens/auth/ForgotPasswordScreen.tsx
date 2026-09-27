@@ -30,12 +30,12 @@ export default function ForgotPasswordScreen() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!trimmedEmail) {
-      (Toast as any).error('Please enter your email address.');
+      (Toast as any).error('Unesite email!');
       return;
     }
 
     if (!emailRegex.test(trimmedEmail)) {
-      (Toast as any).error('Please enter a valid email address.');
+      (Toast as any).error('Unesite važeću email adresu!');
       return;
     }
 
@@ -51,7 +51,7 @@ export default function ForgotPasswordScreen() {
 
       const successMsg =
         response?.message ||
-        'Password reset instructions have been sent to your email.';
+        'Upute za resetiranje lozinke poslano na Vašu email adresu.';
 
       (Toast as any).success(successMsg);
       setSuccessMessage(successMsg);
@@ -59,7 +59,7 @@ export default function ForgotPasswordScreen() {
       const msg =
         err?.response?.data?.message ||
         (typeof err?.response?.data === 'string' ? err.response.data : null) ||
-        'An error occurred while sending the request. Please try again.';
+        'Iznenadna greška se dogodilo tijekom slanja zahtjeva, molim Vas pokušajte ponovno.';
 
       (Toast as any).error(msg);
     } finally {
@@ -80,7 +80,7 @@ export default function ForgotPasswordScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>Forgot Password</Text>
             <Text style={styles.subtitle}>
-              Enter the email address associated with your account to receive a reset code.
+              Unesite email adresu asocirana s Vašim računom kako bi zaprimili kod za reset.
             </Text>
           </View>
 
@@ -91,7 +91,7 @@ export default function ForgotPasswordScreen() {
           )}
 
           <Card style={styles.card}>
-            <Text style={styles.label}>Email Address *</Text>
+            <Text style={styles.label}>Email adresa *</Text>
             <TextInput
               style={styles.input}
               placeholder="user@ffos.hr"
@@ -131,7 +131,7 @@ export default function ForgotPasswordScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.resetNavButtonText}>
-                  Enter code and reset password →
+                  Unesite kod i reset lozinku
                 </Text>
               </TouchableOpacity>
             )}
@@ -141,7 +141,7 @@ export default function ForgotPasswordScreen() {
               onPress={() => navigation.goBack()}
               activeOpacity={0.7}
             >
-              <Text style={styles.backButtonText}>Back to login</Text>
+              <Text style={styles.backButtonText}>Povratak na prijavu</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

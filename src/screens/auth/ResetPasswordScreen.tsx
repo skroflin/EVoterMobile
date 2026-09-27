@@ -36,7 +36,7 @@ export default function ResetPasswordScreen() {
     if (!trimmedCode || !newPassword || !confirmPassword) {
       Toast.show({
         type: 'error',
-        text1: 'All fields are required.',
+        text1: 'Sva polja su potrebna.',
       });
       return;
     }
@@ -44,7 +44,7 @@ export default function ResetPasswordScreen() {
     if (newPassword !== confirmPassword) {
       Toast.show({
         type: 'error',
-        text1: 'New password and confirmation password do not match!',
+        text1: 'Nova lozinka i potvrdna lozinka nisu iste!',
       });
       return;
     }
@@ -52,7 +52,7 @@ export default function ResetPasswordScreen() {
     if (newPassword.length < 8) {
       Toast.show({
         type: 'error',
-        text1: 'New password must be at least 8 characters long.',
+        text1: 'Nova lozinka mora imati barem 8 znakova.',
       });
       return;
     }
@@ -70,7 +70,7 @@ export default function ResetPasswordScreen() {
 
       Toast.show({
         type: 'success',
-        text1: response?.message || 'Password updated successfully! Please log in.',
+        text1: response?.message || 'Lozinka uspješno ažurirana! Prijavite se molim Vas.',
       });
 
       navigation.reset({
@@ -84,7 +84,7 @@ export default function ResetPasswordScreen() {
         typeof apiError === 'string'
           ? apiError
           : apiError?.message ||
-            'Invalid or expired verification code. Please request a new one.';
+            'Netočan ili istekli verifikacijski kod! Molim Vas zatražite novi.';
 
       Toast.show({
         type: 'error',
@@ -114,17 +114,17 @@ export default function ResetPasswordScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Reset Password</Text>
+            <Text style={styles.title}>Reset lozinke</Text>
             <Text style={styles.subtitle}>
-              Enter the recovery code sent to your e-mail and confirm your new password.
+              Unesite kod za povratak poslan na Vašu email adresu i potvrdite lozinku.
             </Text>
           </View>
 
           <Card style={styles.card}>
-            <Text style={styles.label}>Recovery Code *</Text>
+            <Text style={styles.label}>Kod za oporavak *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter recovery code"
+              placeholder="Unesite Vaš kod za oporavak"
               placeholderTextColor="#94A3B8"
               value={code}
               onChangeText={setCode}
@@ -133,10 +133,10 @@ export default function ResetPasswordScreen() {
               editable={!isSubmitting}
             />
 
-            <Text style={styles.label}>New Password *</Text>
+            <Text style={styles.label}>Nova lozinka *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Minimum 8 characters"
+              placeholder="Minimalno 8 znakova"
               placeholderTextColor="#94A3B8"
               value={newPassword}
               onChangeText={setNewPassword}
@@ -144,10 +144,10 @@ export default function ResetPasswordScreen() {
               editable={!isSubmitting}
             />
 
-            <Text style={styles.label}>Confirm New Password *</Text>
+            <Text style={styles.label}>Potvrdite novu lozinku *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Re-enter new password"
+              placeholder="Ponovno unesite Vašu lozinku"
               placeholderTextColor="#94A3B8"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -167,7 +167,7 @@ export default function ResetPasswordScreen() {
               {isSubmitting ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.submitButtonText}>Save New Password</Text>
+                <Text style={styles.submitButtonText}>Spremite novu lozinku</Text>
               )}
             </TouchableOpacity>
           </Card>
@@ -177,7 +177,7 @@ export default function ResetPasswordScreen() {
             onPress={handleCancel}
             activeOpacity={0.7}
           >
-            <Text style={styles.backButtonText}>Cancel and return to login</Text>
+            <Text style={styles.backButtonText}>Otkažite i vratite se na prijavu</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
